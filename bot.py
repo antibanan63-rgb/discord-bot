@@ -1,16 +1,20 @@
 import discord
 from discord.ext import commands
 import asyncio
-import json
 import os
 
-# Load configuration from config.json
-if os.path.exists("config.json"):
-    with open("config.json", "r") as f:
-        config = json.load(f)
-        TOKEN = config.get("TOKEN")
-else:
-    print("❌ Error: config.json file not found! Please create it.")
+# Get Token safely from Railway Environment Variables, or fallback to config.json if local
+TOKEN = os.getenv("DISCORD_TOKEN")
+
+if not TOKEN:
+    import json
+    if os.path.exists("config.json"):
+        with open("config.json", "r") as f:
+            config = json.load(f)
+            TOKEN = config.get("TOKEN")
+
+if not TOKEN:
+    print("❌ Error: Token is missing! Please set DISCORD_TOKEN in Railway variables.")
     exit()
 
 # Bot Configuration
@@ -236,9 +240,6 @@ async def delete_all_channels(ctx):
         print(f"Error deleting current channel: {e}")
 
 # --------------------------------------------------
-# Run the Bot using config.json
+# Run the Bot
 # --------------------------------------------------
-if TOKEN:
-    bot.run(TOKEN)
-else:
-    print("❌ Error: Token is missing inside config.json!")
+bot.run(TOKEN)
