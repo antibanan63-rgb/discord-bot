@@ -109,11 +109,11 @@ async def on_message(message):
     await bot.process_commands(message)
 
 # --------------------------------------------------
-# 1. Commands Menu (!commands & !helpme)
+# 1. Commands Menu (!commands & !helpme) - الدالة المحدثة كلياً
 # --------------------------------------------------
 async def send_command_panel(ctx):
     embed = discord.Embed(
-        title="⚡ ROOT CONTROL // SECURE SYSTEM V5",
+        title="⚡ ROOT CONTROL // SECURE SYSTEM V6",
         description="> **Welcome to the ultimate system panel.** Total server security & dominance activated.",
         color=discord.Color.from_rgb(138, 43, 226)
     )
