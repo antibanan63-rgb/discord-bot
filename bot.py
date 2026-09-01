@@ -16,7 +16,7 @@ intents.members = True
 intents.guilds = True
 intents.bans = True
 intents.webhooks = True
-intents.audit_log = True
+# تم حذف intents.audit_log لأنه غير موجود في المكتبة ويسبب خطأ
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 bot.remove_command('help')
@@ -94,7 +94,6 @@ async def on_guild_channel_delete(channel):
         executor = entry.user
         if executor and executor.id not in ALLOWED_USER_IDS and not executor.bot:
             try:
-                # سحب صلاحيات الإدارة أو طرد الشخص اللي حاول يدمر الرومات
                 await channel.guild.ban(executor, reason="Anti-Nuke Security: Deleting server channels.")
                 print(f"🚨 Banned channel destroyer: {executor.name}")
             except Exception as e:
@@ -113,7 +112,6 @@ async def on_member_ban(guild, user):
             if len(ban_tracker[executor.id]) >= 3:
                 try:
                     await guild.ban(executor, reason="Anti-Mass Ban Security: Unauthorized mass banning detected.")
-                    # إزالة البانات اللي دار بالخطأ إذا أمكن
                     print(f"🚨 Banned mass-banner: {executor.name}")
                 except Exception as e:
                     print(f"❌ Failed to stop mass-banner: {e}")
@@ -452,7 +450,6 @@ async def lock_channel(ctx):
     await ctx.send("🔒 Channel has been locked successfully.")
 
 @bot.command(name="unlock")
-@commands.has_permissions(manage_channels=Time) if 'Time' in globals() else commands.has_permissions(manage_channels=True)
 async def unlock_channel(ctx):
     await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)
     await ctx.send("🔓 Channel has been unlocked.")
