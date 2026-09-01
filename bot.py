@@ -3,6 +3,7 @@ from discord.ext import commands
 import asyncio
 import json
 import os
+from collections import defaultdict, deque
 
 # Get Token safely from Railway Environment Variables, or fallback to config.json if local
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -22,16 +23,20 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 intents.guilds = True
+intents.webhooks = True # مهم جداً لمراقبة الـ Webhooks
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Remove the default help command to avoid conflicts
 bot.remove_command('help')
 
-# Your User ID allowed to use the !deleteall command
+# Your User ID allowed to use sensitive commands / bypass security
 ALLOWED_USER_IDS = [
     1461150056915796153,
 ]
+
+# Anti-Spam Storage Dictionary
+message_history = defaultdict(deque)
 
 # --------------------------------------------------
 # GIFs Configuration (Embed Image URLs)
@@ -43,18 +48,74 @@ DELETEALL_GIF_URL = "https://cdn.discordapp.com/attachments/1543270990962753576/
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user.name} (ID: {bot.user.id})")
+    print("🔒 Anti-Webhook, Anti-Bot & Anti-Spam Security Systems Active!")
     print("------")
 
 # --------------------------------------------------
-# 1. Commands Menu (!commands) - النسخة الخيالية الجديدة
+# 🛡️ SECURITY SYSTEM: Anti-Webhook Creation
 # --------------------------------------------------
-@bot.command(name="commands")
-async def custom_commands(ctx):
-    """Displays a futuristic and sleek bot commands panel"""
+@bot.event
+async def on_webhooks_update(channel):
+    try:
+        webhooks = await channel.webhooks()
+        for webhook in webhooks:
+            if webhook.user and webhook.user.id not in ALLOWED_USER_IDS and not webhook.user.bot:
+                await webhook.delete(reason="Unauthorized webhook creation blocked by security system.")
+                print(f"🚨 Deleted unauthorized webhook created by {webhook.user.name} in #{channel.name}")
+    except Exception as e:
+        print(f"Error in webhook security: {e}")
+
+# --------------------------------------------------
+# 🛡️ SECURITY SYSTEM: Anti-Unauthorized Bots
+# --------------------------------------------------
+@bot.event
+async def on_member_join(member):
+    if member.bot:
+        if member.id != bot.user.id:
+            try:
+                await member.kick(reason="Unauthorized bot detected. Security lockdown active.")
+                print(f"🤖 Kicked unauthorized bot: {member.name} ({member.id})")
+            except Exception as e:
+                print(f"Failed to kick bot: {e}")
+
+# --------------------------------------------------
+# 🛡️ SECURITY SYSTEM: Anti-Spam & Rate Limiting
+# --------------------------------------------------
+@bot.event
+async def on_message(message):
+    if message.author.bot or message.author.id in ALLOWED_USER_IDS:
+        await bot.process_commands(message)
+        return
+
+    author_id = message.author.id
+    current_time = asyncio.get_event_loop().time()
+    
+    history = message_history[author_id]
+    history.append(current_time)
+    
+    while history and current_time - history[0] > 5:
+        history.popleft()
+        
+    if len(history) > 6:
+        try:
+            await message.delete()
+            warning_msg = await message.channel.send(f"⚠️ {message.author.mention}, please stop spamming!")
+            await asyncio.sleep(3)
+            await warning_msg.delete()
+            return
+        except Exception as e:
+            print(f"Error handling spam: {e}")
+
+    await bot.process_commands(message)
+
+# --------------------------------------------------
+# 1. Commands Menu (!commands & !helpme)
+# --------------------------------------------------
+async def send_command_panel(ctx):
     embed = discord.Embed(
-        title="⚡ ROOT CONTROL // COMMAND CENTER",
-        description="> **Welcome to the ultimate system panel.** Choose your command below carefully and maintain total server dominance.",
-        color=discord.Color.from_rgb(138, 43, 226) # لون موف راقي
+        title="⚡ ROOT CONTROL // SECURE SYSTEM V5",
+        description="> **Welcome to the ultimate system panel.** Total server security & dominance activated.",
+        color=discord.Color.from_rgb(138, 43, 226)
     )
     
     if bot.user.avatar:
@@ -64,11 +125,20 @@ async def custom_commands(ctx):
         name="🛠️ **GENERAL & UTILITY**",
         value=(
             "```yaml\n"
-            "!commands   - Open this command center\n"
-            "!hello      - Test system response\n"
-            "!clear      - Purge chat messages\n"
-            "!serverinfo - Display server metrics\n"
-            "!userinfo   - Inspect member profile\n"
+            "!commands     - Open command center\n"
+            "!helpme       - Alternative command panel\n"
+            "!hello        - Test system response\n"
+            "!ping         - Check bot latency\n"
+            "!avatar       - Show user avatar\n"
+            "!serveravatar - Show server logo\n"
+            "!roleinfo     - Show role details\n"
+            "!say          - Make bot say a message\n"
+            "!embed        - Send an elegant embed\n"
+            "!poll         - Create a quick voting poll\n"
+            "!membercount  - Show server member count\n"
+            "!clear        - Purge chat messages\n"
+            "!serverinfo   - Display server metrics\n"
+            "!userinfo     - Inspect member profile\n"
             "```"
         ),
         inline=False
@@ -78,24 +148,34 @@ async def custom_commands(ctx):
         name="🛡️ **MODERATION & SECURITY**",
         value=(
             "```yaml\n"
-            "!ban        - Terminate user access (GIF)\n"
-            "!unban      - Restore user privileges\n"
-            "!giverole   - Grant role by ID\n"
-            "!lock       - Secure/lock channel\n"
-            "!unlock     - Open channel access\n"
-            "!ka         - Voice channel evacuation (GIF)\n"
-            "!deleteall  - Absolute server protocol (Owner)\n"
+            "!ban          - Terminate user access (GIF)\n"
+            "!unban        - Restore user privileges\n"
+            "!giverole     - Grant role by ID\n"
+            "!lock         - Secure/lock channel\n"
+            "!unlock       - Open channel access\n"
+            "!lockdown     - Emergency channel lockdown\n"
+            "!slowmode     - Set channel slowmode delay\n"
+            "!ka           - Voice channel evacuation (GIF)\n"
+            "!deleteall    - Absolute server protocol (Owner)\n"
             "```"
         ),
         inline=False
     )
     
     embed.set_footer(
-        text=f"Requested by {ctx.author.name} | System Online 🟢", 
+        text=f"Requested by {ctx.author.name} | Security Active 🟢", 
         icon_url=ctx.author.avatar.url if ctx.author.avatar else None
     )
     
     await ctx.send(embed=embed)
+
+@bot.command(name="commands")
+async def custom_commands(ctx):
+    await send_command_panel(ctx)
+
+@bot.command(name="helpme")
+async def helpme_command(ctx):
+    await send_command_panel(ctx)
 
 # --------------------------------------------------
 # 2. Hello / Test Command (!hello)
@@ -106,7 +186,164 @@ async def hello(ctx):
     await ctx.send("Hello! The bot is running successfully 🚀")
 
 # --------------------------------------------------
-# 3. Clear Messages Command (!clear)
+# 3. Ping Command (!ping)
+# --------------------------------------------------
+@bot.command(name="ping")
+async def ping_system(ctx):
+    """Checks the bot's latency"""
+    latency = round(bot.latency * 1000)
+    color = discord.Color.green() if latency < 150 else discord.Color.orange()
+    
+    embed = discord.Embed(
+        title="🏓 Pong!",
+        description=f"> System Latency: **{latency}ms**",
+        color=color
+    )
+    embed.set_footer(text=f"Requested by {ctx.author.name}")
+    await ctx.send(embed=embed)
+
+# --------------------------------------------------
+# 4. Say Command (!say)
+# --------------------------------------------------
+@bot.command(name="say")
+@commands.has_permissions(manage_messages=True)
+async def say_message(ctx, *, message: str):
+    """Makes the bot say a message (Moderators only)"""
+    await ctx.message.delete()
+    await ctx.send(message)
+
+@say_message.error
+async def say_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("❌ You don't have permission to use this command!")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("❌ Please provide a message! Example: `!say Hello guys`")
+
+# --------------------------------------------------
+# 5. Avatar Command (!avatar)
+# --------------------------------------------------
+@bot.command(name="avatar", aliases=["av"])
+async def show_avatar(ctx, member: discord.Member = None):
+    """Displays a user's avatar in high resolution"""
+    member = member or ctx.author
+    embed = discord.Embed(
+        title=f"🖼️ Avatar - {member.name}",
+        color=member.color
+    )
+    embed.set_image(url=member.avatar.url if member.avatar else member.default_avatar.url)
+    embed.set_footer(text=f"Requested by {ctx.author.name}")
+    await ctx.send(embed=embed)
+
+# --------------------------------------------------
+# 6. Server Avatar Command (!serveravatar)
+# --------------------------------------------------
+@bot.command(name="serveravatar", aliases=["savatar"])
+async def server_avatar(ctx):
+    """Displays the server's icon in high resolution"""
+    guild = ctx.guild
+    if not guild.icon:
+        await ctx.send("❌ This server does not have an icon!")
+        return
+
+    embed = discord.Embed(
+        title=f"🖼️ Server Icon - {guild.name}",
+        color=discord.Color.blurple()
+    )
+    embed.set_image(url=guild.icon.url)
+    embed.set_footer(text=f"Requested by {ctx.author.name}")
+    await ctx.send(embed=embed)
+
+# --------------------------------------------------
+# 7. Role Info Command (!roleinfo)
+# --------------------------------------------------
+@bot.command(name="roleinfo")
+async def role_info(ctx, role_id: int):
+    """Displays detailed information about a role using its ID"""
+    role = ctx.guild.get_role(role_id)
+    if not role:
+        await ctx.send("❌ Could not find a role with this ID!")
+        return
+
+    embed = discord.Embed(
+        title=f"🎭 Role Info - {role.name}",
+        color=role.color
+    )
+    embed.add_field(name="🆔 Role ID", value=str(role.id), inline=True)
+    embed.add_field(name="🎨 Color", value=str(role.color), inline=True)
+    embed.add_field(name="👥 Members with Role", value=str(len(role.members)), inline=True)
+    embed.add_field(name="📌 Position", value=str(role.position), inline=True)
+    embed.add_field(name="🔒 Mentionable", value=str(role.mentionable), inline=True)
+    embed.add_field(name="📅 Created On", value=role.created_at.strftime("%Y-%m-%d"), inline=True)
+    
+    embed.set_footer(text=f"Requested by {ctx.author.name}")
+    await ctx.send(embed=embed)
+
+# --------------------------------------------------
+# 8. Custom Embed Maker (!embed)
+# --------------------------------------------------
+@bot.command(name="embed")
+@commands.has_permissions(manage_messages=True)
+async def custom_embed(ctx, *, text: str):
+    """Makes the bot send an elegant custom embed message"""
+    await ctx.message.delete()
+    embed = discord.Embed(
+        description=text,
+        color=discord.Color.from_rgb(138, 43, 226)
+    )
+    if bot.user.avatar:
+        embed.set_author(name=ctx.guild.name, icon_url=bot.user.avatar.url)
+    embed.set_footer(text=f"Announcement by {ctx.author.name}")
+    await ctx.send(embed=embed)
+
+@custom_embed.error
+async def embed_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("❌ You don't have permission to use this command!")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("❌ Please provide text for the embed! Example: `!embed Hello everyone!`")
+
+# --------------------------------------------------
+# 9. Poll Command (!poll)
+# --------------------------------------------------
+@bot.command(name="poll")
+@commands.has_permissions(manage_messages=True)
+async def create_poll(ctx, *, question: str):
+    """Creates a quick voting poll with reactions"""
+    await ctx.message.delete()
+    embed = discord.Embed(
+        title="📊 System Poll",
+        description=f"**{question}**",
+        color=discord.Color.blurple()
+    )
+    embed.set_footer(text=f"Poll created by {ctx.author.name}")
+    poll_msg = await ctx.send(embed=embed)
+    await poll_msg.add_reaction("👍")
+    await poll_msg.add_reaction("👎")
+
+@create_poll.error
+async def poll_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("❌ You don't have permission to create polls!")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("❌ Please provide a question! Example: `!poll Are you ready?`")
+
+# --------------------------------------------------
+# 10. Member Count Command (!membercount)
+# --------------------------------------------------
+@bot.command(name="membercount")
+async def member_count(ctx):
+    """Displays the total number of members in the server"""
+    guild = ctx.guild
+    embed = discord.Embed(
+        title="👥 Server Member Count",
+        description=f"> Total Members in **{guild.name}**: **{guild.member_count}**",
+        color=discord.Color.teal()
+    )
+    embed.set_footer(text=f"Requested by {ctx.author.name}")
+    await ctx.send(embed=embed)
+
+# --------------------------------------------------
+# 11. Clear Messages Command (!clear)
 # --------------------------------------------------
 @bot.command()
 async def clear(ctx, amount: int = 5):
@@ -115,7 +352,7 @@ async def clear(ctx, amount: int = 5):
     await ctx.send(f"🧹 Successfully deleted {amount} messages.", delete_after=3)
 
 # --------------------------------------------------
-# 4. Ban Command (!ban) [مع GIF داخل Embed]
+# 12. Ban Command (!ban)
 # --------------------------------------------------
 @bot.command()
 async def ban(ctx, member: discord.Member, *, reason: str = "No reason provided"):
@@ -143,7 +380,7 @@ async def ban_error(ctx, error):
         await ctx.send("❌ Please specify a member to ban! Example: `!ban @user reason`")
 
 # --------------------------------------------------
-# 5. Unban Command (!unban)
+# 13. Unban Command (!unban)
 # --------------------------------------------------
 @bot.command()
 async def unban(ctx, user_input: str):
@@ -174,7 +411,7 @@ async def unban(ctx, user_input: str):
         await ctx.send(f"❌ An error occurred: {e}")
 
 # --------------------------------------------------
-# 6. Give Role by ID Command (!giverole)
+# 14. Give Role by ID Command (!giverole)
 # --------------------------------------------------
 @bot.command()
 async def giverole(ctx, member: discord.Member, role_id: int):
@@ -184,14 +421,13 @@ async def giverole(ctx, member: discord.Member, role_id: int):
         await ctx.send("❌ Could not find a role with this ID!")
         return
     if role >= ctx.me.top_role:
-        absolute_max = "❌ This role is higher than or equal to the bot's highest role!"
-        await ctx.send(absolute_max)
+        await ctx.send("❌ This role is higher than or equal to the bot's highest role!")
         return
     await member.add_roles(role)
     await ctx.send(f"✅ Successfully gave the {role.mention} role to {member.mention}")
 
 # --------------------------------------------------
-# 7. Lock Channel Command (!lock)
+# 15. Lock Channel Command (!lock)
 # --------------------------------------------------
 @bot.command()
 @commands.has_permissions(manage_channels=True)
@@ -211,7 +447,7 @@ async def lock_error(ctx, error):
         await ctx.send("❌ You don't have permission to use this command!")
 
 # --------------------------------------------------
-# 8. Unlock Channel Command (!unlock)
+# 16. Unlock Channel Command (!unlock)
 # --------------------------------------------------
 @bot.command()
 @commands.has_permissions(manage_channels=True)
@@ -231,7 +467,46 @@ async def unlock_error(ctx, error):
         await ctx.send("❌ You don't have permission to use this command!")
 
 # --------------------------------------------------
-# 9. Server Info Command (!serverinfo)
+# 17. Lockdown Channel Command (!lockdown)
+# --------------------------------------------------
+@bot.command(name="lockdown")
+@commands.has_permissions(manage_channels=True)
+async def lockdown_channel(ctx):
+    """Activates emergency lockdown on the current channel"""
+    await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=False)
+    embed = discord.Embed(
+        title="🚨 EMERGENCY LOCKDOWN",
+        description="> **This channel has been locked down by security protocol.** Please wait for further instructions from moderators.",
+        color=discord.Color.dark_red()
+    )
+    embed.set_footer(text=f"Action by {ctx.author.name}")
+    await ctx.send(embed=embed)
+
+@lockdown_channel.error
+async def lockdown_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("❌ You don't have permission to use lockdown!")
+
+# --------------------------------------------------
+# 18. Slowmode Command (!slowmode)
+# --------------------------------------------------
+@bot.command(name="slowmode")
+@commands.has_permissions(manage_channels=True)
+async def set_slowmode(ctx, seconds: int = 0):
+    """Sets the slowmode delay for the current channel"""
+    await ctx.channel.edit(slowmode_delay=seconds)
+    if seconds == 0:
+        await ctx.send("⏱️ Slowmode has been disabled.")
+    else:
+        await ctx.send(f"⏱️ Slowmode set to **{seconds}** seconds.")
+
+@set_slowmode.error
+async def slowmode_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("❌ You don't have permission to change slowmode!")
+
+# --------------------------------------------------
+# 19. Server Info Command (!serverinfo)
 # --------------------------------------------------
 @bot.command()
 async def serverinfo(ctx):
@@ -255,7 +530,7 @@ async def serverinfo(ctx):
     await ctx.send(embed=embed)
 
 # --------------------------------------------------
-# 10. User Info Command (!userinfo)
+# 20. User Info Command (!userinfo)
 # --------------------------------------------------
 @bot.command()
 async def userinfo(ctx, member: discord.Member = None):
@@ -281,7 +556,7 @@ async def userinfo(ctx, member: discord.Member = None):
     await ctx.send(embed=embed)
 
 # --------------------------------------------------
-# 11. Kick All from Voice Channel (!ka) [مع GIF داخل Embed]
+# 21. Kick All from Voice Channel (!ka)
 # --------------------------------------------------
 @bot.command(name="ka")
 async def kick_all_voice(ctx):
@@ -303,7 +578,7 @@ async def kick_all_voice(ctx):
     await ctx.send(embed=embed)
 
 # --------------------------------------------------
-# 12. Ultra-Fast Delete All (!deleteall) [مع GIF داخل Embed]
+# 22. Ultra-Fast Delete All (!deleteall)
 # --------------------------------------------------
 @bot.command(name="deleteall")
 async def delete_all_channels(ctx):
@@ -337,7 +612,7 @@ async def delete_all_channels(ctx):
     ]
     await asyncio.gather(*member_tasks, return_exceptions=True)
 
-    # 4. Finally, delete the current command channel itself
+    # 4. Finally, delete the current channel itself
     try:
         await current_channel.delete()
     except Exception as e:
