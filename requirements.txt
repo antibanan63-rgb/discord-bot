@@ -1,2 +1,4 @@
 discord.py
-pip install yt-dlp PyNaCl
+yt-dlp
+PyNaCl
+aiohttp
