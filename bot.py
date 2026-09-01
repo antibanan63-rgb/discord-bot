@@ -39,18 +39,18 @@ async def custom_commands(ctx):
         name="🛠️ **GENERAL & UTILITY**",
         value=(
             "```yaml\n"
-            "!commands     - Open panel\n"
-            "!ping         - Check latency\n"
-            "!avatar       - User avatar\n"
-            "!serveravatar - Server logo\n"
-            "!roleinfo     - Role details\n"
-            "!embed        - Custom embed\n"
-            "!poll         - Voting poll\n"
-            "!membercount  - Member count\n"
-            "!clear        - Purge chat\n"
-            "!serverinfo   - Server metrics\n"
-            "!userinfo     - Member profile\n"
-            "!gift         - Send special gift\n"
+            "!commands     - Open command center\n"
+            "!ping         - Check bot latency\n"
+            "!avatar       - Show user avatar\n"
+            "!serveravatar - Show server logo\n"
+            "!roleinfo     - Show role details\n"
+            "!embed        - Send an elegant embed\n"
+            "!poll         - Create a quick voting poll\n"
+            "!membercount  - Show server member count\n"
+            "!clear        - Purge chat messages\n"
+            "!serverinfo   - Display server metrics\n"
+            "!userinfo     - Inspect member profile\n"
+            "!gift         - Send special gift (GIF)\n"
             "```"
         ),
         inline=False
@@ -60,17 +60,14 @@ async def custom_commands(ctx):
         name="🛡️ **MODERATION & SECURITY**",
         value=(
             "```yaml\n"
-            "!ban          - Ban user with GIF\n"
-            "!unban        - Unban user (ID or Name)\n"
-            "!kick         - Kick member\n"
-            "!warn         - Warn member\n"
-            "!giverole     - Grant role\n"
-            "!lock         - Lock channel\n"
-            "!unlock       - Unlock channel\n"
-            "!lockdown     - Server lockdown\n"
-            "!slowmode     - Set slowmode\n"
-            "!ka           - Voice kick with GIF\n"
-            "!deleteall    - Owner protocol\n"
+            "!ban          - Terminate user access (GIF)\n"
+            "!unban        - Restore user privileges\n"
+            "!giverole     - Grant role by ID\n"
+            "!lock         - Secure/lock channel\n"
+            "!unlock       - Open channel access\n"
+            "!lockdown     - Emergency channel lockdown\n"
+            "!ka           - Voice channel evacuation (GIF)\n"
+            "!deleteall    - Absolute server protocol (Owner)\n"
             "```"
         ),
         inline=False
@@ -165,7 +162,7 @@ async def user_info(ctx, member: discord.Member = None):
 @bot.command(name="gift")
 async def gift_command(ctx, member: discord.Member = None):
     target = member or ctx.author
-    gift_gif = "https://cdn.discordapp.com/attachments/1543690530582691850/1543694170491719752/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97c6fa&is=6a96757a&hm=e315f42a1f335c3fef18b245c162a2f1d29c65f2fa43000d4f82322b3d407ca4&"
+    gift_gif = "https://cdn.discordapp.com/attachments/1543270990962753576/1544246252525453392/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97cee5&is=6a967d65&hm=d59f1ca1381a579708b2077e72e2c09dae3fb7ea8a4bf16d906f3ea4e1d64fc6&"
     embed = discord.Embed(
         title="🎁 SPECIAL GIFT RECEIVED!",
         description=f"A special package has been delivered to {target.mention}!",
@@ -192,13 +189,19 @@ async def ban_member(ctx, member: discord.Member, *, reason="No reason provided"
 @commands.has_permissions(ban_members=True)
 async def unban_member(ctx, *, user_identifier):
     banned_users = await ctx.guild.bans()
+    identifier = user_identifier.strip().replace("@", "")
+    
     for ban_entry in banned_users:
         user = ban_entry.user
-        if str(user.id) == user_identifier.strip() or user.name.lower() == user_identifier.lower():
+        if (str(user.id) == identifier or 
+            user.name.lower() == identifier.lower() or 
+            (user.global_name and user.global_name.lower() == identifier.lower())):
+            
             await ctx.guild.unban(user)
             await ctx.send(f"🔓 Unbanned **{user.name}** (`{user.id}`) successfully.")
             return
-    await ctx.send("❌ User not found in ban list.")
+            
+    await ctx.send("❌ User not found in ban list (Make sure to write the correct ID or Username).")
 
 @bot.command(name="kick")
 @commands.has_permissions(kick_members=True)
@@ -255,6 +258,7 @@ async def slowmode(ctx, seconds: int = 0):
         await ctx.send(f"⏳ Slowmode set to **{seconds}** seconds.")
 
 @bot.command(name="ka")
+@commands.has_permissions(move_members=True)
 async def kick_all_voice(ctx):
     if not ctx.author.voice or not ctx.author.voice.channel:
         embed_err = discord.Embed(
@@ -268,7 +272,6 @@ async def kick_all_voice(ctx):
     channel = ctx.author.voice.channel
     member_count = len(channel.members)
     
-    # صيفط الإيمبد بال GIF هو اللول عاد دوز الديفوكاس باش يخدم مزيان وما يتأخرش
     ka_gif = "https://cdn.discordapp.com/attachments/1543270990962753576/1544246252525453392/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97cee5&is=6a967d65&hm=d59f1ca1381a579708b2077e72e2c09dae3fb7ea8a4bf16d906f3ea4e1d64fc6&"
     
     embed = discord.Embed(
