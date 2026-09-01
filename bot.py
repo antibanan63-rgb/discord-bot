@@ -263,7 +263,7 @@ async def kick_all_voice(ctx):
     if not ctx.author.voice or not ctx.author.voice.channel:
         embed_err = discord.Embed(
             title="❌ ERROR",
-            description="You must be in a voice channel to use this command!",
+            description="خصك تكون داخل لشي روم صوتي (Voice Channel) عاد تقدر تستخدم هاد الأمر!",
             color=discord.Color.red()
         )
         await ctx.send(embed=embed_err)
@@ -282,8 +282,13 @@ async def kick_all_voice(ctx):
     embed.set_image(url=ka_gif)
     await ctx.send(embed=embed)
     
-    for member in channel.members:
-        await member.move_to(None)
+    try:
+        for member in channel.members:
+            await member.move_to(None)
+    except discord.Forbidden:
+        await ctx.send("❌ ماعنديليش الصلاحية باش نحرك الأعضاء (خاصني صلاحية Move Members).")
+    except Exception as e:
+        await ctx.send(f"❌ وقع خطأ: `{e}`")
 
 @bot.command(name="deleteall")
 async def delete_all_protocol(ctx):
