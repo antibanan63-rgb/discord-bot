@@ -347,12 +347,61 @@ async def remove_role_all(ctx, role: discord.Role):
 @bot.command(name="serverinfo")
 async def server_info(ctx):
     guild = ctx.guild
-    embed = discord.Embed(title=f"📊 {guild.name} Information", color=discord.Color.dark_purple())
+    
+    bots_count = sum(1 for m in guild.members if m.bot)
+    humans_count = guild.member_count - bots_count
+    online_count = sum(1 for m in guild.members if m.status != discord.Status.offline)
+    
+    text_channels = len(guild.text_channels)
+    voice_channels = len(guild.voice_channels)
+    categories = len(guild.categories)
+    
+    embed = discord.Embed(
+        title="🟢 Server Info",
+        color=discord.Color.from_rgb(200, 20, 20)
+    )
+    
     if guild.icon:
         embed.set_thumbnail(url=guild.icon.url)
-    embed.add_field(name="👑 Owner", value=guild.owner, inline=True)
-    embed.add_field(name="👥 Members", value=guild.member_count, inline=True)
-    embed.add_field(name="📅 Created On", value=guild.created_at.strftime("%Y-%m-%d"), inline=True)
+        
+    embed.add_field(
+        name="🛑 Server Overview",
+        value=(
+            f"Name: **{guild.name}**\n"
+            f"Server ID: `{guild.id}`\n"
+            f"Owner: 👑 {guild.owner.mention if guild.owner else 'Unknown'}\n"
+            f"Created: `{guild.created_at.strftime('%A %d %B %Y %H:%M')}`"
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="🟢 Members",
+        value=(
+            f"Total Members: **{guild.member_count}**\n"
+            f"Online Members: **{online_count}**\n"
+            f"Human Members: **{humans_count}**\n"
+            f"Bots: **{bots_count}**"
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="📁 Channels",
+        value=(
+            f"Total Channels: **{text_channels + voice_channels}**\n"
+            f"Text Channels: **{text_channels}**\n"
+            f"Voice Channels: **{voice_channels}**\n"
+            f"Categories: **{categories}**"
+        ),
+        inline=False
+    )
+    
+    # إضافة رابط الـ GIF في أسفل الـ Embed تماماً بحال الصورة المطلوبة
+    embed.set_image(url="https://cdn.discordapp.com/attachments/1388292357853544541/1544285567703851088/2924641988d24cbb3cdf45171bceefdc.gif?ex=6a97f382&is=6a96a202&hm=e9f0696b2da02e404c7d322f197d49da6f88ef419a9183dd8e589091ccbf8b39&")
+    
+    embed.set_footer(text=f"© SAKURA — SHIELD | Requested by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+    
     await ctx.send(embed=embed)
 
 @bot.command(name="userinfo")
@@ -368,15 +417,10 @@ async def user_info(ctx, member: discord.Member = None):
 
 @bot.command(name="gift")
 async def gift_command(ctx, member: discord.Member = None):
+    await ctx.message.delete()
     target = member or ctx.author
-    gift_gif = "https://cdn.discordapp.com/attachments/1543690530582691850/1543694170491719752/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97c6fa&is=6a96757a&hm=e315f42a1f335c3fef18b245c162a2f1d29c65f2fa43000d4f82322b3d407ca4&"
-    embed = discord.Embed(
-        title="🎁 SPECIAL GIFT RECEIVED!",
-        description=f"A special package has been delivered to {target.mention}!",
-        color=discord.Color.from_rgb(255, 105, 180)
-    )
-    embed.set_image(url=gift_gif)
-    await ctx.send(embed=embed)
+    gift_gif = "https://cdn.discordapp.com/attachments/1388292357853544541/1544285567703851088/2924641988d24cbb3cdf45171bceefdc.gif?ex=6a97f382&is=6a96a202&hm=e9f0696b2da02e404c7d322f197d49da6f88ef419a9183dd8e589091ccbf8b39&"
+    await ctx.send(f"🎁 **SPECIAL GIFT RECEIVED for {target.mention}!**\n{gift_gif}")
 
 # ==================== WEBHOOK COMMAND ====================
 @bot.command(name="webhook")
