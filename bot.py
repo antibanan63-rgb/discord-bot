@@ -12,7 +12,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 intents.guilds = True
-intents.bans = True  # ضروري باش يقرا قائمة الممنوعين
+intents.bans = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 bot.remove_command('help')
@@ -189,10 +189,9 @@ async def ban_member(ctx, member: discord.Member, *, reason="No reason provided"
 @bot.command(name="unban")
 @commands.has_permissions(ban_members=True)
 async def unban_member(ctx, *, user_identifier):
-    banned_users = await ctx.guild.bans()
     identifier = user_identifier.strip().replace("@", "")
     
-    for ban_entry in banned_users:
+    async for ban_entry in ctx.guild.bans():
         user = ban_entry.user
         if (str(user.id) == identifier or 
             user.name.lower() == identifier.lower() or 
