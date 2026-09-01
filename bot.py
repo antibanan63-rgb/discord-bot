@@ -17,7 +17,6 @@ intents.members = True
 intents.guilds = True
 intents.bans = True
 intents.webhooks = True
-intents.audit_log = True
 intents.voice_states = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
