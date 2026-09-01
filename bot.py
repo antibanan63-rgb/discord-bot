@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import asyncio
 import os
+import aiohttp
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:
@@ -13,6 +14,7 @@ intents.message_content = True
 intents.members = True
 intents.guilds = True
 intents.bans = True
+intents.webhooks = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 bot.remove_command('help')
@@ -23,6 +25,28 @@ ALLOWED_USER_IDS = [1461150056915796153]
 async def on_ready():
     print(f"Logged in as {bot.user.name} (ID: {bot.user.id})")
     print("🔒 System V6 Active & All Protocols Ready!")
+
+# ==================== AUTO-ANTIBOT SYSTEM ====================
+@bot.event
+async def on_member_join(member):
+    if member.bot:
+        if member.id not in ALLOWED_USER_IDS:
+            try:
+                await member.ban(reason="Anti-Bot Security: Unauthorized bot entry blocked.")
+                print(f"🚨 Banned unauthorized bot automatically: {member.name} ({member.id})")
+            except Exception as e:
+                print(f"❌ Failed to ban bot {member.name}: {e}")
+
+# ==================== ANTI-WEBHOOK SYSTEM ====================
+@bot.event
+async def on_webhooks_update(channel):
+    try:
+        webhooks = await channel.webhooks()
+        for webhook in webhooks:
+            await webhook.delete(reason="Anti-Webhook Security: Unauthorized webhook creation blocked.")
+            print(f"🚨 Deleted unauthorized webhook in channel: {channel.name}")
+    except Exception as e:
+        print(f"❌ Failed to delete webhook: {e}")
 
 # ==================== COMMAND CENTER PANEL ====================
 @bot.command(name="commands")
@@ -52,6 +76,7 @@ async def custom_commands(ctx):
             "!serverinfo   - Server metrics\n"
             "!userinfo     - Member profile\n"
             "!gift         - Send special gift\n"
+            "!webhook      - Send message via Webhook\n"
             "```"
         ),
         inline=False
@@ -71,6 +96,7 @@ async def custom_commands(ctx):
             "!lockdown     - Server lockdown\n"
             "!slowmode     - Set slowmode\n"
             "!ka           - Voice kick with GIF\n"
+            "!anti-on      - Check security status\n"
             "!deleteall    - Owner protocol\n"
             "```"
         ),
@@ -82,6 +108,28 @@ async def custom_commands(ctx):
         icon_url=ctx.author.avatar.url if ctx.author.avatar else None
     )
     
+    await ctx.send(embed=embed)
+
+# ==================== SECURITY CHECK COMMAND ====================
+@bot.command(name="anti-on")
+@commands.has_permissions(administrator=True)
+async def anti_on_status(ctx):
+    embed = discord.Embed(
+        title="🛡️ SECURITY SYSTEMS STATUS",
+        description="Here is the current operational status of the server defense shields:",
+        color=discord.Color.green()
+    )
+    embed.add_field(
+        name="🤖 Anti-Bot Shield",
+        value="🟢 **ACTIVE**\n> Automatically bans any unauthorized bot joining the server.",
+        inline=False
+    )
+    embed.add_field(
+        name="🔗 Anti-Webhook Shield",
+        value="🟢 **ACTIVE**\n> Automatically deletes any newly created webhooks instantly.",
+        inline=False
+    )
+    embed.set_footer(text=f"Checked by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
 
 # ==================== GENERAL & UTILITY COMMANDS ====================
@@ -174,6 +222,19 @@ async def gift_command(ctx, member: discord.Member = None):
     )
     embed.set_image(url=gift_gif)
     await ctx.send(embed=embed)
+
+# ==================== WEBHOOK COMMAND ====================
+@bot.command(name="webhook")
+@commands.has_permissions(administrator=True)
+async def send_webhook(ctx, url: str, *, message: str):
+    await ctx.message.delete()
+    async with aiohttp.ClientSession() as session:
+        webhook = discord.Webhook.from_url(url, session=session)
+        try:
+            await webhook.send(content=message, username="Root Control System", avatar_url=bot.user.avatar.url if bot.user.avatar else None)
+            await ctx.send("✅ Webhook message sent successfully!", delete_after=5)
+        except Exception as e:
+            await ctx.send(f"❌ Failed to send webhook: `{e}`", delete_after=5)
 
 # ==================== MODERATION & SECURITY COMMANDS ====================
 @bot.command(name="ban")
