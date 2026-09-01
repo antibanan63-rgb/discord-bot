@@ -4,7 +4,6 @@ import asyncio
 import os
 import collections
 import aiohttp
-import yt_dlp
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:
@@ -30,34 +29,10 @@ ban_history = collections.defaultdict(list)
 channel_delete_history = collections.defaultdict(list)
 role_delete_history = collections.defaultdict(list)
 
-# YTDL Music Settings
-YTDL_OPTIONS = {
-    'format': 'bestaudio/best',
-    'extractaudio': True,
-    'audioformat': 'mp3',
-    'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
-    'restrictfilenames': True,
-    'noplaylist': True,
-    'nocheckcertificate': True,
-    'ignoreerrors': False,
-    'logtostderr': False,
-    'quiet': True,
-    'no_warnings': True,
-    'default_search': 'auto',
-    'source_address': '0.0.0.0',
-}
-
-FFMPEG_OPTIONS = {
-    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-    'options': '-vn'
-}
-
-ytdl = yt_dlp.YoutubeDL(YTDL_OPTIONS)
-
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user.name} (ID: {bot.user.id})")
-    print("🔒 System V6 Ultimate Active: Anti-Nuke, Anti-Spam, Anti-Bot & Music System Ready! 🛡️🎵")
+    print("🔒 System V6 Ultimate Active: Anti-Nuke, Anti-Spam & Security Shields Online! 🛡️")
 
 # ==================== AUTO-ANTIBOT SYSTEM ====================
 @bot.event
@@ -201,12 +176,6 @@ async def custom_commands(ctx):
         value="```yaml\n!ban, !unban, !kick, !warn, !giverole, !lock, !unlock, !lockdown, !slowmode, !ka, !anti-on, !deleteall\n```",
         inline=False
     )
-
-    embed.add_field(
-        name="🎵 **MUSIC SYSTEM**",
-        value="```yaml\n!play <song>  - Play music from YT\n!stop         - Stop & leave VC\n!pause        - Pause music\n!resume       - Resume music\n```",
-        inline=False
-    )
     
     embed.set_footer(
         text=f"Requested by {ctx.author.name} | Security Active 🟢", 
@@ -235,78 +204,6 @@ async def anti_on_status(ctx):
     
     embed.set_footer(text=f"Checked by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
-
-# ==================== MUSIC SYSTEM COMMANDS 🎵 ====================
-@bot.command(name="play")
-async def play_music(ctx, *, search: str = None):
-    if not ctx.author.voice:
-        await ctx.send("❌ You need to be in a voice channel first!")
-        return
-        
-    if not search:
-        await ctx.send("❌ Please provide a song name. Example: `!play Lacrim`")
-        return
-
-    voice_channel = ctx.author.voice.channel
-    
-    if not ctx.voice_client:
-        await voice_channel.connect()
-    elif ctx.voice_client.channel != voice_channel:
-        await ctx.voice_client.move_to(voice_channel)
-        
-    msg = await ctx.send("🔍 Searching for your song...")
-    
-    try:
-        loop = asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(f"ytsearch:{search}", download=False))
-        
-        if 'entries' in data and data['entries']:
-            data = data['entries'][0]
-        else:
-            await msg.edit(content="❌ No results found for this search!")
-            return
-            
-        song_title = data.get('title', 'Unknown Title')
-        song_url = data.get('url')
-        
-        if not song_url:
-            await msg.edit(content="❌ Error extracting the song URL.")
-            return
-            
-        if ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
-            
-        ctx.voice_client.play(discord.FFmpegPCMAudio(song_url, **FFMPEG_OPTIONS))
-        
-        embed = discord.Embed(title="🎶 Now Playing", description=f"**{song_title}**", color=discord.Color.blue())
-        await msg.edit(content=None, embed=embed)
-        
-    except Exception as e:
-        await msg.edit(content=f"❌ An error occurred while playing the song: `{str(e)[:100]}`")
-
-@bot.command(name="stop")
-async def stop_music(ctx):
-    if ctx.voice_client:
-        await ctx.voice_client.disconnect()
-        await ctx.send("⏹️ Music stopped and disconnected from voice channel.")
-    else:
-        await ctx.send("❌ I am not in a voice channel.")
-
-@bot.command(name="pause")
-async def pause_music(ctx):
-    if ctx.voice_client and ctx.voice_client.is_playing():
-        ctx.voice_client.pause()
-        await ctx.send("⏸️ Music paused.")
-    else:
-        await ctx.send("❌ No music is currently playing.")
-
-@bot.command(name="resume")
-async def resume_music(ctx):
-    if ctx.voice_client and ctx.voice_client.is_paused():
-        ctx.voice_client.resume()
-        await ctx.send("▶️ Music resumed.")
-    else:
-        await ctx.send("❌ Music is not paused.")
 
 # ==================== GENERAL & UTILITY COMMANDS ====================
 @bot.command(name="ping")
