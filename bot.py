@@ -397,10 +397,11 @@ async def server_info(ctx):
         inline=False
     )
     
-    # إضافة رابط الـ GIF في أسفل الـ Embed تماماً بحال الصورة المطلوبة
+    # رابط الـ GIF في الأسفل
     embed.set_image(url="https://cdn.discordapp.com/attachments/1388292357853544541/1544285567703851088/2924641988d24cbb3cdf45171bceefdc.gif?ex=6a97f382&is=6a96a202&hm=e9f0696b2da02e404c7d322f197d49da6f88ef419a9183dd8e589091ccbf8b39&")
     
-    embed.set_footer(text=f"© SAKURA — SHIELD | Requested by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+    # التوقيع الجديد باسم ROOT ACCESS
+    embed.set_footer(text=f"© ROOT ACCESS — SHIELD | Requested by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     
     await ctx.send(embed=embed)
 
