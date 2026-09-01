@@ -16,24 +16,19 @@ intents.members = True
 intents.guilds = True
 intents.bans = True
 intents.webhooks = True
-intents.audit_log = True
-intents.voice_states = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 bot.remove_command('help')
 
 ALLOWED_USER_IDS = [1461150056915796153]
 
-# تتبع العمليات والحمايات
+# قواميس لتتبع الرسائل من أجل نظام Anti-Spam
 message_history = collections.defaultdict(list)
-ban_history = collections.defaultdict(list)
-channel_delete_history = collections.defaultdict(list)
-role_delete_history = collections.defaultdict(list)
 
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user.name} (ID: {bot.user.id})")
-    print("🔒 System V6 Ultimate Active: Anti-Nuke, Anti-Spam, Anti-Bot Ready! 🛡️")
+    print("🔒 System V6 Active & Anti-Spam / Anti-Bot / Anti-Webhook Ready! 🛡️")
 
 # ==================== AUTO-ANTIBOT SYSTEM ====================
 @bot.event
@@ -57,72 +52,6 @@ async def on_webhooks_update(channel):
     except Exception as e:
         print(f"❌ Failed to delete webhook: {e}")
 
-# ==================== ANTI-MASS BAN SYSTEM ====================
-@bot.event
-async def on_member_ban(guild, user):
-    try:
-        async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.ban):
-            moderator = entry.user
-            if moderator.id in ALLOWED_USER_IDS or moderator.bot:
-                return
-
-            current_time = asyncio.get_event_loop().time()
-            ban_history[moderator.id] = [t for t in ban_history[moderator.id] if current_time - t < 5.0]
-            ban_history[moderator.id].append(current_time)
-
-            if len(ban_history[moderator.id]) >= 3:
-                try:
-                    await guild.ban(moderator, reason="Anti-Nuke Security: Mass banning detected!")
-                    print(f"🚨 Anti-Nuke Triggered: Banned mass-banner {moderator.name}")
-                except Exception as e:
-                    print(f"❌ Failed to ban mass-banner: {e}")
-    except Exception as e:
-        pass
-
-# ==================== ANTI-MASS CHANNEL DELETE SYSTEM ====================
-@bot.event
-async def on_guild_channel_delete(channel):
-    try:
-        guild = channel.guild
-        async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_delete):
-            moderator = entry.user
-            if moderator.id in ALLOWED_USER_IDS or moderator.bot:
-                return
-
-            current_time = asyncio.get_event_loop().time()
-            channel_delete_history[moderator.id] = [t for t in channel_delete_history[moderator.id] if current_time - t < 5.0]
-            channel_delete_history[moderator.id].append(current_time)
-
-            if len(channel_delete_history[moderator.id]) >= 2:
-                try:
-                    await guild.ban(moderator, reason="Anti-Nuke Security: Mass channel deletion detected!")
-                except Exception as e:
-                    pass
-    except Exception as e:
-        pass
-
-# ==================== ANTI-MASS ROLE DELETE SYSTEM ====================
-@bot.event
-async def on_guild_role_delete(role):
-    try:
-        guild = role.guild
-        async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.role_delete):
-            moderator = entry.user
-            if moderator.id in ALLOWED_USER_IDS or moderator.bot:
-                return
-
-            current_time = asyncio.get_event_loop().time()
-            role_delete_history[moderator.id] = [t for t in role_delete_history[moderator.id] if current_time - t < 5.0]
-            role_delete_history[moderator.id].append(current_time)
-
-            if len(role_delete_history[moderator.id]) >= 2:
-                try:
-                    await guild.ban(moderator, reason="Anti-Nuke Security: Mass role deletion detected!")
-                except Exception as e:
-                    pass
-    except Exception as e:
-        pass
-
 # ==================== ANTI-SPAM SYSTEM ====================
 @bot.event
 async def on_message(message):
@@ -144,13 +73,15 @@ async def on_message(message):
         try:
             await message.channel.purge(limit=6, check=lambda m: m.author.id == author_id)
             await message.guild.ban(message.author, reason="Anti-Spam Security: Sponging / Spamming detected.")
+            
             warning_msg = await message.channel.send(f"🚨 **Anti-Spam Triggered:** {message.author.mention} was automatically **banned** for spamming!")
             await asyncio.sleep(5)
             await warning_msg.delete()
+            
             del message_history[author_id]
             return
         except Exception as e:
-            pass
+            print(f"❌ Failed to ban spammer {message.author.name}: {e}")
 
     await bot.process_commands(message)
 
@@ -168,13 +99,44 @@ async def custom_commands(ctx):
     
     embed.add_field(
         name="🛠️ **GENERAL & UTILITY**",
-        value="```yaml\n!commands, !ping, !avatar, !serveravatar, !roleinfo, !embed, !poll, !membercount, !clear, !serverinfo, !userinfo, !gift, !webhook\n```",
+        value=(
+            "```yaml\n"
+            "!commands     - Open panel\n"
+            "!ping         - Check latency\n"
+            "!avatar       - User avatar\n"
+            "!serveravatar - Server logo\n"
+            "!roleinfo     - Role details\n"
+            "!embed        - Custom embed\n"
+            "!poll         - Voting poll\n"
+            "!membercount  - Member count\n"
+            "!clear        - Purge chat\n"
+            "!serverinfo   - Server metrics\n"
+            "!userinfo     - Member profile\n"
+            "!gift         - Send special gift\n"
+            "!webhook      - Send message via Webhook\n"
+            "```"
+        ),
         inline=False
     )
     
     embed.add_field(
         name="🛡️ **MODERATION & SECURITY**",
-        value="```yaml\n!ban, !unban, !kick, !warn, !giverole, !lock, !unlock, !lockdown, !slowmode, !ka, !anti-on, !deleteall\n```",
+        value=(
+            "```yaml\n"
+            "!ban          - Ban user with GIF\n"
+            "!unban        - Unban user by ID\n"
+            "!kick         - Kick member\n"
+            "!warn         - Warn member\n"
+            "!giverole     - Grant role\n"
+            "!lock         - Channel lock\n"
+            "!unlock       - Channel unlock\n"
+            "!lockdown     - Server lockdown\n"
+            "!slowmode     - Set slowmode\n"
+            "!ka           - Voice kick with GIF\n"
+            "!anti-on      - Check security status\n"
+            "!deleteall    - Owner protocol\n"
+            "```"
+        ),
         inline=False
     )
     
@@ -197,12 +159,21 @@ async def anti_on_status(ctx):
         description="Here is the current operational status of the server defense shields:",
         color=discord.Color.green()
     )
-    embed.add_field(name="🤖 Anti-Bot Shield", value="🟢 **ACTIVE**\n> Automatically bans unauthorized bots.", inline=False)
-    embed.add_field(name="🔗 Anti-Webhook Shield", value="🟢 **ACTIVE**\n> Automatically deletes malicious webhooks.", inline=False)
-    embed.add_field(name="⚡ Anti-Spam Shield", value="🟢 **ACTIVE**\n> Automatically bans rapid spammers.", inline=False)
-    embed.add_field(name="🚨 Anti-Mass Ban Shield", value="🟢 **ACTIVE**\n> Bans members mass-banning users.", inline=False)
-    embed.add_field(name="🧹 Anti-Mass Delete Shield", value="🟢 **ACTIVE**\n> Bans members mass-deleting channels/roles.", inline=False)
-    
+    embed.add_field(
+        name="🤖 Anti-Bot Shield",
+        value="🟢 **ACTIVE**\n> Automatically bans any unauthorized bot joining the server.",
+        inline=False
+    )
+    embed.add_field(
+        name="🔗 Anti-Webhook Shield",
+        value="🟢 **ACTIVE**\n> Automatically deletes any newly created webhooks instantly.",
+        inline=False
+    )
+    embed.add_field(
+        name="⚡ Anti-Spam Shield",
+        value="🟢 **ACTIVE**\n> Automatically bans members spamming messages rapidly.",
+        inline=False
+    )
     embed.set_footer(text=f"Checked by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
 
