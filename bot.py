@@ -50,7 +50,6 @@ async def custom_commands(ctx):
             "!clear        - Purge chat\n"
             "!serverinfo   - Server metrics\n"
             "!userinfo     - Member profile\n"
-            "!gift         - Send special gift (GIF)\n"
             "```"
         ),
         inline=False
@@ -162,18 +161,6 @@ async def user_info(ctx, member: discord.Member = None):
     embed.add_field(name="Account Created", value=target.created_at.strftime("%Y-%m-%d"), inline=True)
     await ctx.send(embed=embed)
 
-@bot.command(name="gift")
-async def gift_command(ctx, member: discord.Member = None):
-    target = member or ctx.author
-    gift_gif = "https://cdn.discordapp.com/attachments/1543690530582691850/1543694170491719752/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97c6fa&is=6a96757a&hm=e315f42a1f335c3fef18b245c162a2f1d29c65f2fa43000d4f82322b3d407ca4&"
-    embed = discord.Embed(
-        title="🎁 SPECIAL GIFT RECEIVED!",
-        description=f"A special package has been delivered to {target.mention}!",
-        color=discord.Color.from_rgb(255, 105, 180)
-    )
-    embed.set_image(url=gift_gif)
-    await ctx.send(embed=embed)
-
 # ==================== MODERATION & SECURITY COMMANDS ====================
 @bot.command(name="ban")
 @commands.has_permissions(ban_members=True)
@@ -268,11 +255,11 @@ async def kick_all_voice(ctx):
     channel = ctx.author.voice.channel
     member_count = len(channel.members)
     
-    ka_gif = "https://cdn.discordapp.com/attachments/1543690530582691850/1543694170491719752/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97c6fa&is=6a96757a&hm=e315f42a1f335c3fef18b245c162a2f1d29c65f2fa43000d4f82322b3d407ca4&"
-    
     for member in channel.members:
         await member.move_to(None)
         
+    ka_gif = "https://cdn.discordapp.com/attachments/1543690530582691850/1543694170491719752/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97c6fa&is=6a96757a&hm=e315f42a1f335c3fef18b245c162a2f1d29c65f2fa43000d4f82322b3d407ca4&"
+    
     embed = discord.Embed(
         title="👢 VOICE CHANNEL EVACUATED",
         description=f"**Channel:** `{channel.name}`\n**Evacuated Members:** `{member_count}`\n**Executor:** {ctx.author.mention}",
