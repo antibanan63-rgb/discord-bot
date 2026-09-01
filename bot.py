@@ -4,6 +4,7 @@ import asyncio
 import os
 import collections
 import aiohttp
+import yt_dlp
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:
@@ -16,19 +17,48 @@ intents.members = True
 intents.guilds = True
 intents.bans = True
 intents.webhooks = True
+intents.audit_log = True
+intents.voice_states = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 bot.remove_command('help')
 
 ALLOWED_USER_IDS = [1461150056915796153]
 
-# قواميس لتتبع الرسائل من أجل نظام Anti-Spam
+# تتبع العمليات والحمايات
 message_history = collections.defaultdict(list)
+ban_history = collections.defaultdict(list)
+channel_delete_history = collections.defaultdict(list)
+role_delete_history = collections.defaultdict(list)
+
+# إعدادات الموسيقى YTDL
+YTDL_OPTIONS = {
+    'format': 'bestaudio/best',
+    'extractaudio': True,
+    'audioformat': 'mp3',
+    'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
+    'restrictfilenames': True,
+    'noplaylist': True,
+    'nocheckcertificate': True,
+    'ignoreerrors': False,
+    'logtostderr': False,
+    'quiet': True,
+    'no_warnings': True,
+    'default_search': 'auto',
+    'source_address': '0.0.0.0',
+}
+
+FFMPEG_OPTIONS = {
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+    'options': '-vn'
+}
+
+ytdl = yt_dlp.YoutubeDL(YTDL_OPTIONS)
 
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user.name} (ID: {bot.user.id})")
-    print("🔒 System V6 Active & Anti-Spam / Anti-Bot / Anti-Webhook Ready! 🛡️")
+    print("🔒 System V6 Ultimate Active: Anti-Nuke, Anti-Spam, Anti-Bot & Music System Ready! 🛡️🎵")
 
 # ==================== AUTO-ANTIBOT SYSTEM ====================
 @bot.event
@@ -52,6 +82,72 @@ async def on_webhooks_update(channel):
     except Exception as e:
         print(f"❌ Failed to delete webhook: {e}")
 
+# ==================== ANTI-MASS BAN SYSTEM ====================
+@bot.event
+async def on_member_ban(guild, user):
+    try:
+        async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.ban):
+            moderator = entry.user
+            if moderator.id in ALLOWED_USER_IDS or moderator.bot:
+                return
+
+            current_time = asyncio.get_event_loop().time()
+            ban_history[moderator.id] = [t for t in ban_history[moderator.id] if current_time - t < 5.0]
+            ban_history[moderator.id].append(current_time)
+
+            if len(ban_history[moderator.id]) >= 3:
+                try:
+                    await guild.ban(moderator, reason="Anti-Nuke Security: Mass banning detected!")
+                    print(f"🚨 Anti-Nuke Triggered: Banned mass-banner {moderator.name}")
+                except Exception as e:
+                    print(f"❌ Failed to ban mass-banner: {e}")
+    except Exception as e:
+        pass
+
+# ==================== ANTI-MASS CHANNEL DELETE SYSTEM ====================
+@bot.event
+async def on_guild_channel_delete(channel):
+    try:
+        guild = channel.guild
+        async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_delete):
+            moderator = entry.user
+            if moderator.id in ALLOWED_USER_IDS or moderator.bot:
+                return
+
+            current_time = asyncio.get_event_loop().time()
+            channel_delete_history[moderator.id] = [t for t in channel_delete_history[moderator.id] if current_time - t < 5.0]
+            channel_delete_history[moderator.id].append(current_time)
+
+            if len(channel_delete_history[moderator.id]) >= 2:
+                try:
+                    await guild.ban(moderator, reason="Anti-Nuke Security: Mass channel deletion detected!")
+                except Exception as e:
+                    pass
+    except Exception as e:
+        pass
+
+# ==================== ANTI-MASS ROLE DELETE SYSTEM ====================
+@bot.event
+async def on_guild_role_delete(role):
+    try:
+        guild = role.guild
+        async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.role_delete):
+            moderator = entry.user
+            if moderator.id in ALLOWED_USER_IDS or moderator.bot:
+                return
+
+            current_time = asyncio.get_event_loop().time()
+            role_delete_history[moderator.id] = [t for t in role_delete_history[moderator.id] if current_time - t < 5.0]
+            role_delete_history[moderator.id].append(current_time)
+
+            if len(role_delete_history[moderator.id]) >= 2:
+                try:
+                    await guild.ban(moderator, reason="Anti-Nuke Security: Mass role deletion detected!")
+                except Exception as e:
+                    pass
+    except Exception as e:
+        pass
+
 # ==================== ANTI-SPAM SYSTEM ====================
 @bot.event
 async def on_message(message):
@@ -73,15 +169,13 @@ async def on_message(message):
         try:
             await message.channel.purge(limit=6, check=lambda m: m.author.id == author_id)
             await message.guild.ban(message.author, reason="Anti-Spam Security: Sponging / Spamming detected.")
-            
             warning_msg = await message.channel.send(f"🚨 **Anti-Spam Triggered:** {message.author.mention} was automatically **banned** for spamming!")
             await asyncio.sleep(5)
             await warning_msg.delete()
-            
             del message_history[author_id]
             return
         except Exception as e:
-            print(f"❌ Failed to ban spammer {message.author.name}: {e}")
+            pass
 
     await bot.process_commands(message)
 
@@ -99,44 +193,19 @@ async def custom_commands(ctx):
     
     embed.add_field(
         name="🛠️ **GENERAL & UTILITY**",
-        value=(
-            "```yaml\n"
-            "!commands     - Open panel\n"
-            "!ping         - Check latency\n"
-            "!avatar       - User avatar\n"
-            "!serveravatar - Server logo\n"
-            "!roleinfo     - Role details\n"
-            "!embed        - Custom embed\n"
-            "!poll         - Voting poll\n"
-            "!membercount  - Member count\n"
-            "!clear        - Purge chat\n"
-            "!serverinfo   - Server metrics\n"
-            "!userinfo     - Member profile\n"
-            "!gift         - Send special gift\n"
-            "!webhook      - Send message via Webhook\n"
-            "```"
-        ),
+        value="```yaml\n!commands, !ping, !avatar, !serveravatar, !roleinfo, !embed, !poll, !membercount, !clear, !serverinfo, !userinfo, !gift, !webhook\n```",
         inline=False
     )
     
     embed.add_field(
         name="🛡️ **MODERATION & SECURITY**",
-        value=(
-            "```yaml\n"
-            "!ban          - Ban user with GIF\n"
-            "!unban        - Unban user by ID\n"
-            "!kick         - Kick member\n"
-            "!warn         - Warn member\n"
-            "!giverole     - Grant role\n"
-            "!lock         - Channel lock\n"
-            "!unlock       - Channel unlock\n"
-            "!lockdown     - Server lockdown\n"
-            "!slowmode     - Set slowmode\n"
-            "!ka           - Voice kick with GIF\n"
-            "!anti-on      - Check security status\n"
-            "!deleteall    - Owner protocol\n"
-            "```"
-        ),
+        value="```yaml\n!ban, !unban, !kick, !warn, !giverole, !lock, !unlock, !lockdown, !slowmode, !ka, !anti-on, !deleteall\n```",
+        inline=False
+    )
+
+    embed.add_field(
+        name="🎵 **MUSIC SYSTEM**",
+        value="```yaml\n!play <song>  - Play music from YT\n!stop         - Stop & leave VC\n!pause        - Pause music\n!resume       - Resume music\n```",
         inline=False
     )
     
@@ -159,23 +228,75 @@ async def anti_on_status(ctx):
         description="Here is the current operational status of the server defense shields:",
         color=discord.Color.green()
     )
-    embed.add_field(
-        name="🤖 Anti-Bot Shield",
-        value="🟢 **ACTIVE**\n> Automatically bans any unauthorized bot joining the server.",
-        inline=False
-    )
-    embed.add_field(
-        name="🔗 Anti-Webhook Shield",
-        value="🟢 **ACTIVE**\n> Automatically deletes any newly created webhooks instantly.",
-        inline=False
-    )
-    embed.add_field(
-        name="⚡ Anti-Spam Shield",
-        value="🟢 **ACTIVE**\n> Automatically bans members spamming messages rapidly.",
-        inline=False
-    )
+    embed.add_field(name="🤖 Anti-Bot Shield", value="🟢 **ACTIVE**\n> Automatically bans unauthorized bots.", inline=False)
+    embed.add_field(name="🔗 Anti-Webhook Shield", value="🟢 **ACTIVE**\n> Automatically deletes malicious webhooks.", inline=False)
+    embed.add_field(name="⚡ Anti-Spam Shield", value="🟢 **ACTIVE**\n> Automatically bans rapid spammers.", inline=False)
+    embed.add_field(name="🚨 Anti-Mass Ban Shield", value="🟢 **ACTIVE**\n> Bans members mass-banning users.", inline=False)
+    embed.add_field(name="🧹 Anti-Mass Delete Shield", value="🟢 **ACTIVE**\n> Bans members mass-deleting channels/roles.", inline=False)
+    
     embed.set_footer(text=f"Checked by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
+
+# ==================== MUSIC SYSTEM COMMANDS 🎵 ====================
+@bot.command(name="play")
+async def play_music(ctx, *, search: str):
+    if not ctx.author.voice:
+        await ctx.send("❌ You need to be in a voice channel first!")
+        return
+        
+    voice_channel = ctx.author.voice.channel
+    
+    if not ctx.voice_client:
+        await voice_channel.connect()
+    elif ctx.voice_client.channel != voice_channel:
+        await ctx.voice_client.move_to(voice_channel)
+        
+    msg = await ctx.send("🔍 Searching for your song...")
+    
+    try:
+        loop = asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(f"ytsearch:{search}", download=False))
+        
+        if 'entries' in data:
+            data = data['entries'][0]
+            
+        song_title = data.get('title')
+        song_url = data.get('url')
+        
+        if ctx.voice_client.is_playing():
+            ctx.voice_client.stop()
+            
+        ctx.voice_client.play(discord.FFmpegPCMAudio(song_url, **FFMPEG_OPTIONS))
+        
+        embed = discord.Embed(title="🎶 Now Playing", description=f"**{song_title}**", color=discord.Color.blue())
+        await msg.edit(content=None, embed=embed)
+        
+    except Exception as e:
+        await msg.edit(content=f"❌ Error playing the song: `{str(e)[:100]}`")
+
+@bot.command(name="stop")
+async def stop_music(ctx):
+    if ctx.voice_client:
+        await ctx.voice_client.disconnect()
+        await ctx.send("⏹️ Music stopped and disconnected from voice channel.")
+    else:
+        await ctx.send("❌ I am not in a voice channel.")
+
+@bot.command(name="pause")
+async def pause_music(ctx):
+    if ctx.voice_client and ctx.voice_client.is_playing():
+        ctx.voice_client.pause()
+        await ctx.send("⏸️ Music paused.")
+    else:
+        await ctx.send("❌ No music is currently playing.")
+
+@bot.command(name="resume")
+async def resume_music(ctx):
+    if ctx.voice_client and ctx.voice_client.is_paused():
+        ctx.voice_client.resume()
+        await ctx.send("▶️ Music resumed.")
+    else:
+        await ctx.send("❌ Music is not paused.")
 
 # ==================== GENERAL & UTILITY COMMANDS ====================
 @bot.command(name="ping")
