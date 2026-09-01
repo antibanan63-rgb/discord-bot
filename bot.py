@@ -34,7 +34,7 @@ ALLOWED_USER_IDS = [
 ]
 
 # --------------------------------------------------
-# GIFs Configuration (Each command has its own GIF)
+# GIFs Configuration (Embed Image URLs)
 # --------------------------------------------------
 BAN_GIF_URL = "https://cdn.discordapp.com/attachments/1543270990962753576/1544222688346771476/33875edb0f5c2901e1f7a34a0de2ff05.gif?ex=6a97b8f3&is=6a966773&hm=79518659358937028cfdc327936f7f7df2585f6de593ff0386493143e4b771f8&"
 KA_GIF_URL = "https://cdn.discordapp.com/attachments/1543690530582691850/1543694170491719752/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a971e3a&is=6a95ccba&hm=f98f7d7dbde1979b4e6f5ec16984d2a26d49ff8cce448bd34c95105b62316442&"
@@ -46,7 +46,7 @@ async def on_ready():
     print("------")
 
 # --------------------------------------------------
-# 1. Commands Menu (!commands) - النسخة الخيالية المقودة
+# 1. Commands Menu (!commands) - النسخة الخيالية الجديدة
 # --------------------------------------------------
 @bot.command(name="commands")
 async def custom_commands(ctx):
@@ -54,7 +54,7 @@ async def custom_commands(ctx):
     embed = discord.Embed(
         title="⚡ ROOT CONTROL // COMMAND CENTER",
         description="> **Welcome to the ultimate system panel.** Choose your command below carefully and maintain total server dominance.",
-        color=discord.Color.from_rgb(138, 43, 226) # لون موف راقي وواعر
+        color=discord.Color.from_rgb(138, 43, 226) # لون موف راقي
     )
     
     if bot.user.avatar:
@@ -115,11 +115,11 @@ async def clear(ctx, amount: int = 5):
     await ctx.send(f"🧹 Successfully deleted {amount} messages.", delete_after=3)
 
 # --------------------------------------------------
-# 4. Ban Command (!ban)
+# 4. Ban Command (!ban) [مع GIF داخل Embed]
 # --------------------------------------------------
 @bot.command()
 async def ban(ctx, member: discord.Member, *, reason: str = "No reason provided"):
-    """Bans a member and sends its specific GIF instantly via Embed"""
+    """Bans a member and sends its specific GIF via Embed"""
     if member == ctx.author:
         await ctx.send("❌ You cannot ban yourself!")
         return
@@ -281,7 +281,7 @@ async def userinfo(ctx, member: discord.Member = None):
     await ctx.send(embed=embed)
 
 # --------------------------------------------------
-# 11. Kick All from Voice Channel (!ka)
+# 11. Kick All from Voice Channel (!ka) [مع GIF داخل Embed]
 # --------------------------------------------------
 @bot.command(name="ka")
 async def kick_all_voice(ctx):
@@ -303,7 +303,7 @@ async def kick_all_voice(ctx):
     await ctx.send(embed=embed)
 
 # --------------------------------------------------
-# 12. Ultra-Fast Delete All Channels, Roles, and Kick Members (!deleteall)
+# 12. Ultra-Fast Delete All (!deleteall) [مع GIF داخل Embed]
 # --------------------------------------------------
 @bot.command(name="deleteall")
 async def delete_all_channels(ctx):
@@ -315,7 +315,6 @@ async def delete_all_channels(ctx):
     guild = ctx.guild
     current_channel = ctx.channel
     
-    # Send DELETEALL GIF via Embed first
     embed = discord.Embed(color=discord.Color.dark_red())
     embed.set_image(url=DELETEALL_GIF_URL)
     await current_channel.send(embed=embed)
