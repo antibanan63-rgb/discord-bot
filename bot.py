@@ -21,13 +21,13 @@ ALLOWED_USER_IDS = [1461150056915796153]
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user.name} (ID: {bot.user.id})")
-    print("🔒 System V6 Active & All Advanced Security Commands Loaded!")
+    print("🔒 System V6 Active & All Protocols Ready!")
 
 # ==================== COMMAND CENTER PANEL ====================
 @bot.command(name="commands")
 async def custom_commands(ctx):
     embed = discord.Embed(
-        title="⚡ ROOT CONTROL // SECURE SYSTEM V6",
+        title="⚡ ROOT CONTROL // SYSTEM V6",
         description="> **Welcome to the ultimate system panel.** Total server security & dominance activated.",
         color=discord.Color.from_rgb(138, 43, 226)
     )
@@ -39,17 +39,17 @@ async def custom_commands(ctx):
         name="🛠️ **GENERAL & UTILITY**",
         value=(
             "```yaml\n"
-            "!commands     - Open command center\n"
-            "!ping         - Check bot latency\n"
-            "!avatar       - Show user avatar\n"
-            "!serveravatar - Show server logo\n"
-            "!roleinfo     - Show role details\n"
-            "!embed        - Send an elegant embed\n"
-            "!poll         - Create a quick voting poll\n"
-            "!membercount  - Show server member count\n"
-            "!clear        - Purge chat messages\n"
-            "!serverinfo   - Display server metrics\n"
-            "!userinfo     - Inspect member profile\n"
+            "!commands     - Open panel\n"
+            "!ping         - Check latency\n"
+            "!avatar       - User avatar\n"
+            "!serveravatar - Server logo\n"
+            "!roleinfo     - Role details\n"
+            "!embed        - Custom embed\n"
+            "!poll         - Voting poll\n"
+            "!membercount  - Member count\n"
+            "!clear        - Purge chat\n"
+            "!serverinfo   - Server metrics\n"
+            "!userinfo     - Member profile\n"
             "```"
         ),
         inline=False
@@ -59,17 +59,17 @@ async def custom_commands(ctx):
         name="🛡️ **MODERATION & SECURITY**",
         value=(
             "```yaml\n"
-            "!ban          - Terminate user (GIF)\n"
-            "!unban        - Restore user privileges\n"
-            "!kick         - Kick member from server\n"
-            "!warn         - Issue a formal warning\n"
-            "!giverole     - Grant role by ID\n"
-            "!lock         - Secure/lock channel\n"
-            "!unlock       - Open channel access\n"
-            "!lockdown     - Emergency channel lockdown\n"
-            "!slowmode     - Set channel slowmode\n"
-            "!ka           - Voice channel evacuation\n"
-            "!deleteall    - Absolute server protocol\n"
+            "!ban          - Ban user\n"
+            "!unban        - Unban user\n"
+            "!kick         - Kick member\n"
+            "!warn         - Warn member\n"
+            "!giverole     - Grant role\n"
+            "!lock         - Lock channel\n"
+            "!unlock       - Unlock channel\n"
+            "!lockdown     - Server lockdown\n"
+            "!slowmode     - Set slowmode\n"
+            "!ka           - Voice kick all\n"
+            "!deleteall    - Owner protocol\n"
             "```"
         ),
         inline=False
@@ -166,16 +166,15 @@ async def user_info(ctx, member: discord.Member = None):
 @commands.has_permissions(ban_members=True)
 async def ban_member(ctx, member: discord.Member, *, reason="No reason provided"):
     await member.ban(reason=reason)
-    await ctx.send(f"🔨 Banned **{member.name}** | Reason: `{reason}`\nhttps://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif")
+    await ctx.send(f"🔨 Banned **{member.name}** | Reason: `{reason}`")
 
 @bot.command(name="unban")
 @commands.has_permissions(ban_members=True)
 async def unban_member(ctx, *, user_name):
     banned_users = await ctx.guild.bans()
-    member_name, member_discriminator = user_name.split('#') if '#' in user_name else (user_name, None)
     for ban_entry in banned_users:
         user = ban_entry.user
-        if user.name == member_name:
+        if user.name.lower() == user_name.lower():
             await ctx.guild.unban(user)
             await ctx.send(f"🔓 Unbanned **{user.name}** successfully.")
             return
@@ -236,7 +235,6 @@ async def slowmode(ctx, seconds: int = 0):
         await ctx.send(f"⏳ Slowmode set to **{seconds}** seconds.")
 
 @bot.command(name="ka")
-@commands.has_permissions(move_members=True)
 async def kick_all_voice(ctx):
     if not ctx.author.voice or not ctx.author.voice.channel:
         await ctx.send("❌ You must be in a voice channel!")
