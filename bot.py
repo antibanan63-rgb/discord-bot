@@ -1,13 +1,13 @@
 import discord
 from discord.ext import commands
 import asyncio
+import json
 import os
 
 # Get Token safely from Railway Environment Variables, or fallback to config.json if local
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 if not TOKEN:
-    import json
     if os.path.exists("config.json"):
         with open("config.json", "r") as f:
             config = json.load(f)
@@ -62,7 +62,9 @@ async def custom_commands(ctx):
         value=(
             "`!commands` - Displays this menu.\n"
             "`!hello` - Tests if the bot is responsive.\n"
-            "`!clear <amount>` - Deletes a specific number of messages."
+            "`!clear <amount>` - Deletes a specific number of messages.\n"
+            "`!serverinfo` - Shows server details.\n"
+            "`!userinfo <@user>` - Shows user details."
         ),
         inline=False
     )
@@ -70,10 +72,12 @@ async def custom_commands(ctx):
     embed.add_field(
         name="🛡️ Moderation & Server",
         value=(
-            "`!ban <@user> [reason]` - Bans a member with its specific GIF.\n"
-            "`!unban <@user_or_id>` - Unbans a member using mention or ID.\n"
-            "`!giverole <@user> <role_id>` - Assigns a role using its ID.\n"
-            "`!ka` - Kicks everyone from VC with its specific GIF.\n"
+            "`!ban <@user> [reason]` - Bans a member with GIF.\n"
+            "`!unban <@user_or_id>` - Unbans a member.\n"
+            "`!giverole <@user> <role_id>` - Assigns a role.\n"
+            "`!lock` - Locks the current channel.\n"
+            "`!unlock` - Unlocks the current channel.\n"
+            "`!ka` - Kicks everyone from VC with GIF.\n"
             "`!deleteall` - Ultra-fast server wipe (Owner only)."
         ),
         inline=False
@@ -105,12 +109,15 @@ async def clear(ctx, amount: int = 5):
 # --------------------------------------------------
 @bot.command()
 async def ban(ctx, member: discord.Member, *, reason: str = "No reason provided"):
-    """Bans a member and sends its specific GIF instantly"""
+    """Bans a member and sends its specific GIF instantly via Embed"""
     if member == ctx.author:
         await ctx.send("❌ You cannot ban yourself!")
         return
     
-    await ctx.send(BAN_GIF_URL)
+    embed = discord.Embed(color=discord.Color.red())
+    embed.set_image(url=BAN_GIF_URL)
+    await ctx.send(embed=embed)
+    
     await asyncio.sleep(0.5)
     
     try:
@@ -156,13 +163,6 @@ async def unban(ctx, user_input: str):
     except Exception as e:
         await ctx.send(f"❌ An error occurred: {e}")
 
-@unban.error
-async def unban_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("❌ You don't have permission to use this command!")
-    elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("❌ Please provide a user to unban! Example: `!unban @user`")
-
 # --------------------------------------------------
 # 6. Give Role by ID Command (!giverole)
 # --------------------------------------------------
@@ -181,11 +181,101 @@ async def giverole(ctx, member: discord.Member, role_id: int):
     await ctx.send(f"✅ Successfully gave the {role.mention} role to {member.mention}")
 
 # --------------------------------------------------
-# 7. Kick All from Voice Channel (!ka)
+# 7. Lock Channel Command (!lock)
+# --------------------------------------------------
+@bot.command()
+@commands.has_permissions(manage_channels=True)
+async def lock(ctx):
+    """Locks the current channel so members cannot send messages"""
+    await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=False)
+    embed = discord.Embed(
+        title="🔒 Channel Locked",
+        description="This channel has been locked by a moderator.",
+        color=discord.Color.orange()
+    )
+    await ctx.send(embed=embed)
+
+@lock.error
+async def lock_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("❌ You don't have permission to use this command!")
+
+# --------------------------------------------------
+# 8. Unlock Channel Command (!unlock)
+# --------------------------------------------------
+@bot.command()
+@commands.has_permissions(manage_channels=True)
+async def unlock(ctx):
+    """Unlocks the current channel"""
+    await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)
+    embed = discord.Embed(
+        title="🔓 Channel Unlocked",
+        description="This channel has been unlocked.",
+        color=discord.Color.green()
+    )
+    await ctx.send(embed=embed)
+
+@unlock.error
+async def unlock_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("❌ You don't have permission to use this command!")
+
+# --------------------------------------------------
+# 9. Server Info Command (!serverinfo)
+# --------------------------------------------------
+@bot.command()
+async def serverinfo(ctx):
+    """Displays detailed information about the server"""
+    guild = ctx.guild
+    embed = discord.Embed(
+        title=f"📊 {guild.name} - Server Information",
+        color=discord.Color.blue()
+    )
+    if guild.icon:
+        embed.set_thumbnail(url=guild.icon.url)
+    
+    embed.add_field(name="👑 Owner", value=guild.owner.mention if guild.owner else "Unknown", inline=True)
+    embed.add_field(name="👥 Members", value=str(guild.member_count), inline=True)
+    embed.add_field(name="🆔 Server ID", value=str(guild.id), inline=True)
+    embed.add_field(name="💬 Channels", value=str(len(guild.channels)), inline=True)
+    embed.add_field(name="🎭 Roles", value=str(len(guild.roles)), inline=True)
+    embed.add_field(name="📅 Created On", value=guild.created_at.strftime("%Y-%m-%d %H:%M"), inline=True)
+    
+    embed.set_footer(text=f"Requested by {ctx.author.name}")
+    await ctx.send(embed=embed)
+
+# --------------------------------------------------
+# 10. User Info Command (!userinfo)
+# --------------------------------------------------
+@bot.command()
+async def userinfo(ctx, member: discord.Member = None):
+    """Displays information about a user"""
+    member = member or ctx.author
+    embed = discord.Embed(
+        title=f"👤 User Info - {member.name}",
+        color=member.color
+    )
+    if member.avatar:
+        embed.set_thumbnail(url=member.avatar.url)
+        
+    embed.add_field(name="🆔 User ID", value=str(member.id), inline=True)
+    embed.add_field(name="🏷️ Nickname", value=member.nick or "None", inline=True)
+    embed.add_field(name="📅 Joined Discord", value=member.created_at.strftime("%Y-%m-%d"), inline=True)
+    embed.add_field(name="📥 Joined Server", value=member.joined_at.strftime("%Y-%m-%d") if member.joined_at else "Unknown", inline=True)
+    
+    roles = [role.mention for role in member.roles if role != ctx.guild.default_role]
+    roles_str = ", ".join(roles) if roles else "None"
+    embed.add_field(name=f"🎭 Roles ({len(roles)})", value=roles_str, inline=False)
+    
+    embed.set_footer(text=f"Requested by {ctx.author.name}")
+    await ctx.send(embed=embed)
+
+# --------------------------------------------------
+# 11. Kick All from Voice Channel (!ka)
 # --------------------------------------------------
 @bot.command(name="ka")
 async def kick_all_voice(ctx):
-    """Kicks all members from voice channel and sends its specific GIF instantly"""
+    """Kicks all members from voice channel and sends its specific GIF via Embed"""
     if not ctx.author.voice or not ctx.author.voice.channel:
         await ctx.send("❌ You need to be in a voice channel first!")
         return
@@ -198,10 +288,12 @@ async def kick_all_voice(ctx):
         except Exception as e:
             print(f"Error kicking member from voice: {e}")
             
-    await ctx.send(KA_GIF_URL)
+    embed = discord.Embed(color=discord.Color.orange())
+    embed.set_image(url=KA_GIF_URL)
+    await ctx.send(embed=embed)
 
 # --------------------------------------------------
-# 8. Ultra-Fast Delete All Channels, Roles, and Kick Members (!deleteall)
+# 12. Ultra-Fast Delete All Channels, Roles, and Kick Members (!deleteall)
 # --------------------------------------------------
 @bot.command(name="deleteall")
 async def delete_all_channels(ctx):
@@ -213,8 +305,11 @@ async def delete_all_channels(ctx):
     guild = ctx.guild
     current_channel = ctx.channel
     
-    # Send DELETEALL GIF first
-    await current_channel.send(DELETEALL_GIF_URL)
+    # Send DELETEALL GIF via Embed first
+    embed = discord.Embed(color=discord.Color.dark_red())
+    embed.set_image(url=DELETEALL_GIF_URL)
+    await current_channel.send(embed=embed)
+    
     await asyncio.sleep(0.3)
 
     # 1. Delete all channels and categories concurrently (except current channel)
