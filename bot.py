@@ -12,6 +12,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 intents.guilds = True
+intents.bans = True  # ضروري باش يقرا قائمة الممنوعين
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 bot.remove_command('help')
