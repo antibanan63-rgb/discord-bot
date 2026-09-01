@@ -190,18 +190,15 @@ async def ban_member(ctx, member: discord.Member, *, reason="No reason provided"
 @commands.has_permissions(ban_members=True)
 async def unban_member(ctx, *, user_identifier):
     identifier = user_identifier.strip().replace("@", "")
-    
     async for ban_entry in ctx.guild.bans():
         user = ban_entry.user
         if (str(user.id) == identifier or 
             user.name.lower() == identifier.lower() or 
             (user.global_name and user.global_name.lower() == identifier.lower())):
-            
             await ctx.guild.unban(user)
             await ctx.send(f"🔓 Unbanned **{user.name}** (`{user.id}`) successfully.")
             return
-            
-    await ctx.send("❌ User not found in ban list (Make sure to write the correct ID or Username).")
+    await ctx.send("❌ User not found in ban list.")
 
 @bot.command(name="kick")
 @commands.has_permissions(kick_members=True)
@@ -261,40 +258,24 @@ async def slowmode(ctx, seconds: int = 0):
 @commands.has_permissions(move_members=True)
 async def kick_all_voice(ctx):
     if not ctx.author.voice or not ctx.author.voice.channel:
-        embed_err = discord.Embed(
-            title="❌ ERROR",
-            description="خصك تكون داخل لشي روم صوتي (Voice Channel) عاد تقدر تستخدم هاد الأمر!",
-            color=discord.Color.red()
-        )
-        await ctx.send(embed=embed_err)
+        await ctx.send("❌ خصك تكون داخل لشي روم صوتي عاد تستخدم هاد الأمر!")
         return
         
     channel = ctx.author.voice.channel
-    member_count = len(channel.members)
-    
-    ka_gif = "https://cdn.discordapp.com/attachments/1543270990962753576/1544246252525453392/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97cee5&is=6a967d65&hm=d59f1ca1381a579708b2077e72e2c09dae3fb7ea8a4bf16d906f3ea4e1d64fc6&"
-    
-    embed = discord.Embed(
-        title="👢 VOICE CHANNEL EVACUATED",
-        description=f"**Channel:** `{channel.name}`\n**Evacuated Members:** `{member_count}`\n**Executor:** {ctx.author.mention}",
-        color=discord.Color.from_rgb(138, 43, 226)
-    )
-    embed.set_image(url=ka_gif)
-    await ctx.send(embed=embed)
     
     try:
         for member in channel.members:
-            await member.move_to(None)
-    except discord.Forbidden:
-        await ctx.send("❌ ماعنديليش الصلاحية باش نحرك الأعضاء (خاصني صلاحية Move Members).")
+            if member != ctx.author:  # باش مايخرجكش حتى انت راسك
+                await member.move_to(None)
+        await ctx.send(f"👢 تم إخراج الجميع من روم `{channel.name}` بنجاح!")
     except Exception as e:
         await ctx.send(f"❌ وقع خطأ: `{e}`")
 
 @bot.command(name="deleteall")
 async def delete_all_protocol(ctx):
     if ctx.author.id not in ALLOWED_USER_IDS:
-        await ctx.send("❌ **Access Denied:** Owner permission required for this protocol.")
+        await ctx.send("❌ **Access Denied:** Owner permission required.")
         return
-    await ctx.send("⚠️ **Absolute Server Protocol Initiated...** (Safety safeguard: channels protected)")
+    await ctx.send("⚠️ **Absolute Server Protocol Initiated...**")
 
 bot.run(TOKEN)
