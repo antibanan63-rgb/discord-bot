@@ -20,6 +20,7 @@ intents.webhooks = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 bot.remove_command('help')
 
+# الآيدي ديالك بوحدك هو لي عنده الصلاحيات الكاملة
 ALLOWED_USER_IDS = [1461150056915796153]
 
 # قواميس لتتبع العمليات والرسائل
@@ -54,21 +55,47 @@ async def on_webhooks_update(channel):
     except Exception as e:
         print(f"❌ Failed to delete webhook: {e}")
 
-# ==================== ANTI-ROLE ASSIGN SYSTEM ====================
+# ==================== ANTI-ROLE & BOT TAMPERING SYSTEM ====================
 @bot.event
 async def on_member_update(before, after):
     added_roles = [role for role in after.roles if role not in before.roles]
     for role in added_roles:
-        if role.permissions.administrator or role.permissions.ban_members or role.permissions.kick_members:
+        if role.permissions.administrator or role.permissions.ban_members or role.permissions.kick_members or role.position >= after.guild.me.top_role.position:
             async for entry in after.guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update):
                 if entry.target.id == after.id:
                     executor = entry.user
-                    if executor.id not in ALLOWED_USER_IDS and not executor.bot:
+                    if executor and executor.id not in ALLOWED_USER_IDS and not executor.bot:
                         try:
-                            await after.remove_roles(role, reason="Anti-Role Security: Unauthorized high-permission role assignment blocked.")
-                            print(f"🚨 Blocked unauthorized dangerous role '{role.name}' given to {after.name} by {executor.name}")
+                            await after.remove_roles(role, reason="Anti-Role Security: Unauthorized high-permission role assignment.")
+                            await after.guild.ban(executor, reason="Anti-Tamper Security: Attempting to bypass or tamper with bot/admin roles.")
+                            print(f"🚨 Banned role tamperer {executor.name} for trying to mess with roles!")
                         except Exception as e:
-                            print(f"❌ Failed to remove unauthorized role: {e}")
+                            print(f"❌ Failed to ban tamperer / remove role: {e}")
+
+@bot.event
+async def on_guild_update(before, after):
+    if before.name != after.name:
+        async for entry in after.audit_logs(limit=1, action=discord.AuditLogAction.guild_update):
+            executor = entry.user
+            if executor and executor.id not in ALLOWED_USER_IDS and not executor.bot:
+                try:
+                    await after.edit(name=before.name, reason="Anti-Tamper: Unauthorized server name change.")
+                    await after.ban(executor, reason="Anti-Tamper Security: Attempting to rename server unauthorized.")
+                    print(f"🚨 Banned tamperer {executor.name} for changing server name!")
+                except Exception as e:
+                    print(f"❌ Failed to revert server name / ban tamperer: {e}")
+
+@bot.event
+async def on_guild_role_update(before, after):
+    async for entry in after.guild.audit_logs(limit=1, action=discord.AuditLogAction.role_update):
+        executor = entry.user
+        if executor and executor.id not in ALLOWED_USER_IDS and not executor.bot:
+            if after.position >= after.guild.me.top_role.position:
+                try:
+                    await after.guild.ban(executor, reason="Anti-Tamper Security: Attempting to modify bot or high-level roles.")
+                    print(f"🚨 Banned role tamperer: {executor.name}")
+                except Exception as e:
+                    print(f"❌ Failed to ban role tamperer: {e}")
 
 # ==================== ANTI-CHANNEL CREATE / DELETE SYSTEM ====================
 @bot.event
@@ -93,6 +120,7 @@ async def on_guild_channel_delete(channel):
         executor = entry.user
         if executor and executor.id not in ALLOWED_USER_IDS and not executor.bot:
             try:
+                # حظر أي شخص يمسح قناة فوراً وبدون استثناء (ما عدا أنت)
                 await channel.guild.ban(executor, reason="Anti-Nuke Security: Deleting server channels.")
                 print(f"🚨 Banned channel destroyer: {executor.name}")
             except Exception as e:
@@ -200,20 +228,20 @@ async def custom_commands(ctx):
         name="🛠️ **GENERAL & UTILITY**",
         value=(
             "```yaml\n"
-            "!commands     - Open panel\n"
-            "!ping         - Check latency\n"
-            "!avatar       - User avatar\n"
-            "!serveravatar - Server logo\n"
-            "!roleinfo     - Role details\n"
-            "!embed        - Custom embed\n"
-            "!poll         - Voting poll\n"
-            "!membercount  - Member count\n"
-            "!clear        - Purge chat\n"
-            "!serverinfo   - Server metrics\n"
-            "!userinfo     - Member profile\n"
-            "!gift         - Send special gift\n"
-            "!webhook      - Send message via Webhook\n"
-            "!removerole   - Remove role from all\n"
+            "!commands      - Open panel\n"
+            "!ping          - Check latency\n"
+            "!avatar        - User avatar\n"
+            "!serveravatar  - Server logo\n"
+            "!roleinfo      - Role details\n"
+            "!embed         - Custom embed\n"
+            "!poll          - Voting poll\n"
+            "!membercount   - Member count\n"
+            "!clear         - Purge chat\n"
+            "!serverinfo    - Server metrics\n"
+            "!userinfo      - Member profile\n"
+            "!gift          - Send special gift\n"
+            "!webhook       - Send message via Webhook\n"
+            "!removerole    - Remove role from all\n"
             "```"
         ),
         inline=False
@@ -223,18 +251,18 @@ async def custom_commands(ctx):
         name="🛡️ **MODERATION & SECURITY**",
         value=(
             "```yaml\n"
-            "!ban          - Ban user with GIF\n"
-            "!unban        - Unban user by ID\n"
-            "!kick         - Kick member\n"
-            "!warn         - Warn member\n"
-            "!giverole     - Grant role\n"
-            "!lock         - Channel lock\n"
-            "!unlock       - Channel unlock\n"
-            "!lockdown     - Server lockdown\n"
-            "!slowmode     - Set slowmode\n"
-            "!ka           - Voice kick with GIF\n"
-            "!anti-on      - Check security status\n"
-            "!deleteall    - Owner protocol\n"
+            "!ban           - Ban user with GIF\n"
+            "!unban         - Unban user by ID\n"
+            "!kick          - Kick member\n"
+            "!warn          - Warn member\n"
+            "!giverole      - Grant role\n"
+            "!lock          - Channel lock\n"
+            "!unlock        - Channel unlock\n"
+            "!lockdown      - Server lockdown\n"
+            "!slowmode      - Set slowmode\n"
+            "!ka            - Voice kick with GIF\n"
+            "!anti-on       - Check security status\n"
+            "!deleteall     - Owner protocol\n"
             "```"
         ),
         inline=False
@@ -267,7 +295,8 @@ async def anti_on_status(ctx):
     embed.add_field(name="🛡️ Anti-Role Assign", value="🟢 **ACTIVE**\n> Blocks rogue admin roles.", inline=False)
     embed.add_field(name="📢 Anti-Everyone Shield", value="🟢 **ACTIVE**\n> Blocks @everyone / @here.", inline=False)
     embed.add_field(name="🔨 Anti-Mass Ban Shield", value="🟢 **ACTIVE**\n> Stops mass banning raids.", inline=False)
-    embed.add_field(name="📂 Anti-Nuke Channel Shield", value="🟢 **ACTIVE**\n> Stops channel creation/deletion raids.", inline=False)
+    embed.add_field(name="📂 Anti-Nuke Channel Shield", value="🟢 **ACTIVE**\n> Instantly bans anyone deleting channels.", inline=False)
+    embed.add_field(name="🔒 Anti-Tamper & Bot Shield", value="🟢 **ACTIVE**\n> Protects bot roles & instantly bans tamperers.", inline=False)
     
     embed.set_footer(text=f"© ROOT ACCESS — SHIELD | Checked by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
@@ -406,7 +435,6 @@ async def server_info(ctx):
     
     await ctx.send(embed=embed)
 
-# ==================== USERINFO COMMAND (NEW STYLE) ====================
 @bot.command(name="userinfo")
 async def user_info(ctx, member: discord.Member = None):
     target = member or ctx.author
@@ -478,7 +506,6 @@ async def gift_command(ctx, member: discord.Member = None):
     gift_gif = "https://cdn.discordapp.com/attachments/1388292357853544541/1544285567703851088/2924641988d24cbb3cdf45171bceefdc.gif?ex=6a97f382&is=6a96a202&hm=e9f0696b2da02e404c7d322f197d49da6f88ef419a9183dd8e589091ccbf8b39&"
     await ctx.send(f"🎁 **SPECIAL GIFT RECEIVED for {target.mention}!**\n{gift_gif}")
 
-# ==================== WEBHOOK COMMAND ====================
 @bot.command(name="webhook")
 @commands.has_permissions(administrator=True)
 async def send_webhook(ctx, url: str, *, message: str):
