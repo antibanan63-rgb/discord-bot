@@ -62,7 +62,7 @@ async def custom_commands(ctx):
         value=(
             "```yaml\n"
             "!ban          - Ban user with GIF\n"
-            "!unban        - Unban user (ID or Name)\n"
+            "!unban        - Unban user by ID\n"
             "!kick         - Kick member\n"
             "!warn         - Warn member\n"
             "!giverole     - Grant role\n"
@@ -191,16 +191,15 @@ async def ban_member(ctx, member: discord.Member, *, reason="No reason provided"
 
 @bot.command(name="unban")
 @commands.has_permissions(ban_members=True)
-async def unban_member(ctx, *, user_identifier):
-    banned_users = await ctx.guild.bans()
-    identifier = user_identifier.strip()
-    for ban_entry in banned_users:
-        user = ban_entry.user
-        if str(user.id) == identifier or user.name.lower() == identifier.lower():
-            await ctx.guild.unban(user)
-            await ctx.send(f"🔓 Unbanned **{user.name}** (`{user.id}`) successfully.")
-            return
-    await ctx.send("❌ User not found in ban list.")
+async def unban_member(ctx, user_id: int):
+    try:
+        user = discord.Object(id=user_id)
+        await ctx.guild.unban(user)
+        await ctx.send(f"🔓 Unbanned user ID **{user_id}** successfully.")
+    except discord.NotFound:
+        await ctx.send("❌ User not found in ban list or invalid ID.")
+    except Exception as e:
+        await ctx.send(f"❌ وقع خطأ: `{e}`")
 
 @bot.command(name="kick")
 @commands.has_permissions(kick_members=True)
@@ -270,7 +269,7 @@ async def kick_all_voice(ctx):
     channel = ctx.author.voice.channel
     member_count = len(channel.members)
     
-    ka_gif = "https://cdn.discordapp.com/attachments/1543270990962753576/1544253396675203102/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97d58c&is=6a96840c&hm=7d42ff83542aeb38a1ef030e6698301b9c0b88f7bfcd3f89e1577ec093fe5f7e&"
+    ka_gif = "https://cdn.discordapp.com/attachments/1543690530582691850/1543694170491719752/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97c6fa&is=6a96757a&hm=e315f42a1f335c3fef18b245c162a2f1d29c65f2fa43000d4f82322b3d407ca4&"
     
     embed = discord.Embed(
         title="👢 VOICE CHANNEL EVACUATED",
