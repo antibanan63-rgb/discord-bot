@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import asyncio
 import os
+import collections
 import aiohttp
 
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -21,10 +22,13 @@ bot.remove_command('help')
 
 ALLOWED_USER_IDS = [1461150056915796153]
 
+# قواميس لتتبع الرسائل من أجل نظام Anti-Spam
+message_history = collections.defaultdict(list)
+
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user.name} (ID: {bot.user.id})")
-    print("🔒 System V6 Active & All Protocols Ready!")
+    print("🔒 System V6 Active & Anti-Spam / Anti-Bot / Anti-Webhook Ready! 🛡️")
 
 # ==================== AUTO-ANTIBOT SYSTEM ====================
 @bot.event
@@ -47,6 +51,39 @@ async def on_webhooks_update(channel):
             print(f"🚨 Deleted unauthorized webhook in channel: {channel.name}")
     except Exception as e:
         print(f"❌ Failed to delete webhook: {e}")
+
+# ==================== ANTI-SPAM SYSTEM ====================
+@bot.event
+async def on_message(message):
+    if message.author.bot or not message.guild:
+        await bot.process_commands(message)
+        return
+
+    if message.author.id in ALLOWED_USER_IDS or message.author.guild_permissions.administrator:
+        await bot.process_commands(message)
+        return
+
+    author_id = message.author.id
+    current_time = asyncio.get_event_loop().time()
+
+    message_history[author_id] = [t for t in message_history[author_id] if current_time - t < 3.0]
+    message_history[author_id].append(current_time)
+
+    if len(message_history[author_id]) >= 5:
+        try:
+            await message.channel.purge(limit=6, check=lambda m: m.author.id == author_id)
+            await message.guild.ban(message.author, reason="Anti-Spam Security: Sponging / Spamming detected.")
+            
+            warning_msg = await message.channel.send(f"🚨 **Anti-Spam Triggered:** {message.author.mention} was automatically **banned** for spamming!")
+            await asyncio.sleep(5)
+            await warning_msg.delete()
+            
+            del message_history[author_id]
+            return
+        except Exception as e:
+            print(f"❌ Failed to ban spammer {message.author.name}: {e}")
+
+    await bot.process_commands(message)
 
 # ==================== COMMAND CENTER PANEL ====================
 @bot.command(name="commands")
@@ -91,8 +128,8 @@ async def custom_commands(ctx):
             "!kick         - Kick member\n"
             "!warn         - Warn member\n"
             "!giverole     - Grant role\n"
-            "!lock         - Lock channel\n"
-            "!unlock       - Unlock channel\n"
+            "!lock         - Channel lock\n"
+            "!unlock       - Channel unlock\n"
             "!lockdown     - Server lockdown\n"
             "!slowmode     - Set slowmode\n"
             "!ka           - Voice kick with GIF\n"
@@ -110,10 +147,13 @@ async def custom_commands(ctx):
     
     await ctx.send(embed=embed)
 
-# ==================== SECURITY CHECK COMMAND ====================
+# ==================== OWNER-LOCKED SECURITY CHECK COMMAND ====================
 @bot.command(name="anti-on")
-@commands.has_permissions(administrator=True)
 async def anti_on_status(ctx):
+    if ctx.author.id not in ALLOWED_USER_IDS:
+        await ctx.send("❌ **Access Denied:** Owner permission required for this command.")
+        return
+
     embed = discord.Embed(
         title="🛡️ SECURITY SYSTEMS STATUS",
         description="Here is the current operational status of the server defense shields:",
@@ -127,6 +167,11 @@ async def anti_on_status(ctx):
     embed.add_field(
         name="🔗 Anti-Webhook Shield",
         value="🟢 **ACTIVE**\n> Automatically deletes any newly created webhooks instantly.",
+        inline=False
+    )
+    embed.add_field(
+        name="⚡ Anti-Spam Shield",
+        value="🟢 **ACTIVE**\n> Automatically bans members spamming messages rapidly.",
         inline=False
     )
     embed.set_footer(text=f"Checked by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
