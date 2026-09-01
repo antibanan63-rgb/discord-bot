@@ -36,9 +36,9 @@ ALLOWED_USER_IDS = [
 # --------------------------------------------------
 # GIFs Configuration (Each command has its own GIF)
 # --------------------------------------------------
-BAN_GIF_URL = "https://cdn.discordapp.com/attachments/1543690530582691850/1543693424815771748/33875edb0f5c2901e1f7a34a0de2ff05.gif?ex=6a95cc08&is=6a947a88&hm=424e9dd7a9a08ec6cf6842b1ec841bfd851e275eaa53135df1dc3ac8916bdebf&"
-KA_GIF_URL = "https://cdn.discordapp.com/attachments/1543690530582691850/1543694170491719752/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a95ccba&is=6a947b3a&hm=3758448e150114fa094d2b019ddf5dde5a7be517c597554cbb91440637e98658&"
-DELETEALL_GIF_URL = "https://cdn.discordapp.com/attachments/1543690503348813934/1543707506751180873/8a36885c2659fed6316e5645c7b4afae.gif?ex=6a95d926&is=6a9487a6&hm=c99e5d2712d54feae9a2f724cd2ff432d490d389ead1a1cb0908edc12a8f3d07&"
+BAN_GIF_URL = "https://cdn.discordapp.com/attachments/1543270990962753576/1544222688346771476/33875edb0f5c2901e1f7a34a0de2ff05.gif?ex=6a97b8f3&is=6a966773&hm=79518659358937028cfdc327936f7f7df2585f6de593ff0386493143e4b771f8&"
+KA_GIF_URL = "https://cdn.discordapp.com/attachments/1543690530582691850/1543694170491719752/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a971e3a&is=6a95ccba&hm=f98f7d7dbde1979b4e6f5ec16984d2a26d49ff8cce448bd34c95105b62316442&"
+DELETEALL_GIF_URL = "https://cdn.discordapp.com/attachments/1543270990962753576/1544222530968096838/8a36885c2659fed6316e5645c7b4afae.gif?ex=6a97b8cd&is=6a96674d&hm=90da8773fd168366811e3549645eb5a8845f79fb3773fbb89257bf254e5deb73&"
 
 @bot.event
 async def on_ready():
