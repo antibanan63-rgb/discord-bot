@@ -16,6 +16,7 @@ intents.members = True
 intents.guilds = True
 intents.bans = True
 intents.webhooks = True
+intents.audit_log = True
 intents.voice_states = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -23,7 +24,7 @@ bot.remove_command('help')
 
 ALLOWED_USER_IDS = [1461150056915796153]
 
-# Tracking dictionaries for security systems
+# تتبع العمليات والحمايات
 message_history = collections.defaultdict(list)
 ban_history = collections.defaultdict(list)
 channel_delete_history = collections.defaultdict(list)
@@ -32,7 +33,7 @@ role_delete_history = collections.defaultdict(list)
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user.name} (ID: {bot.user.id})")
-    print("🔒 System V6 Ultimate Active: Anti-Nuke, Anti-Spam & Security Shields Online! 🛡️")
+    print("🔒 System V6 Ultimate Active: Anti-Nuke, Anti-Spam, Anti-Bot Ready! 🛡️")
 
 # ==================== AUTO-ANTIBOT SYSTEM ====================
 @bot.event
@@ -333,7 +334,7 @@ async def unban_member(ctx, user_id: int):
     except discord.NotFound:
         await ctx.send("❌ User not found in ban list or invalid ID.")
     except Exception as e:
-        await ctx.send(f"❌ An error occurred: `{e}`")
+        await ctx.send(f"❌ وقع خطأ: `{e}`")
 
 @bot.command(name="kick")
 @commands.has_permissions(kick_members=True)
