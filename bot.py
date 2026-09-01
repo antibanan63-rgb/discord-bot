@@ -40,18 +40,18 @@ async def custom_commands(ctx):
         name="🛠️ **GENERAL & UTILITY**",
         value=(
             "```yaml\n"
-            "!commands     - Open command center\n"
-            "!ping         - Check bot latency\n"
-            "!avatar       - Show user avatar\n"
-            "!serveravatar - Show server logo\n"
-            "!roleinfo     - Show role details\n"
-            "!embed        - Send an elegant embed\n"
-            "!poll         - Create a quick voting poll\n"
-            "!membercount  - Show server member count\n"
-            "!clear        - Purge chat messages\n"
-            "!serverinfo   - Display server metrics\n"
-            "!userinfo     - Inspect member profile\n"
-            "!gift         - Send special gift (GIF)\n"
+            "!commands     - Open panel\n"
+            "!ping         - Check latency\n"
+            "!avatar       - User avatar\n"
+            "!serveravatar - Server logo\n"
+            "!roleinfo     - Role details\n"
+            "!embed        - Custom embed\n"
+            "!poll         - Voting poll\n"
+            "!membercount  - Member count\n"
+            "!clear        - Purge chat\n"
+            "!serverinfo   - Server metrics\n"
+            "!userinfo     - Member profile\n"
+            "!gift         - Send special gift\n"
             "```"
         ),
         inline=False
@@ -61,14 +61,17 @@ async def custom_commands(ctx):
         name="🛡️ **MODERATION & SECURITY**",
         value=(
             "```yaml\n"
-            "!ban          - Terminate user access (GIF)\n"
-            "!unban        - Restore user privileges\n"
-            "!giverole     - Grant role by ID\n"
-            "!lock         - Secure/lock channel\n"
-            "!unlock       - Open channel access\n"
-            "!lockdown     - Emergency channel lockdown\n"
-            "!ka           - Voice channel evacuation (GIF)\n"
-            "!deleteall    - Absolute server protocol (Owner)\n"
+            "!ban          - Ban user with GIF\n"
+            "!unban        - Unban user (ID or Name)\n"
+            "!kick         - Kick member\n"
+            "!warn         - Warn member\n"
+            "!giverole     - Grant role\n"
+            "!lock         - Lock channel\n"
+            "!unlock       - Unlock channel\n"
+            "!lockdown     - Server lockdown\n"
+            "!slowmode     - Set slowmode\n"
+            "!ka           - Voice kick with GIF\n"
+            "!deleteall    - Owner protocol\n"
             "```"
         ),
         inline=False
@@ -163,7 +166,7 @@ async def user_info(ctx, member: discord.Member = None):
 @bot.command(name="gift")
 async def gift_command(ctx, member: discord.Member = None):
     target = member or ctx.author
-    gift_gif = "https://cdn.discordapp.com/attachments/1543270990962753576/1544246252525453392/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97cee5&is=6a967d65&hm=d59f1ca1381a579708b2077e72e2c09dae3fb7ea8a4bf16d906f3ea4e1d64fc6&"
+    gift_gif = "https://cdn.discordapp.com/attachments/1543690530582691850/1543694170491719752/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97c6fa&is=6a96757a&hm=e315f42a1f335c3fef18b245c162a2f1d29c65f2fa43000d4f82322b3d407ca4&"
     embed = discord.Embed(
         title="🎁 SPECIAL GIFT RECEIVED!",
         description=f"A special package has been delivered to {target.mention}!",
@@ -189,12 +192,11 @@ async def ban_member(ctx, member: discord.Member, *, reason="No reason provided"
 @bot.command(name="unban")
 @commands.has_permissions(ban_members=True)
 async def unban_member(ctx, *, user_identifier):
-    identifier = user_identifier.strip().replace("@", "")
-    async for ban_entry in ctx.guild.bans():
+    banned_users = await ctx.guild.bans()
+    identifier = user_identifier.strip()
+    for ban_entry in banned_users:
         user = ban_entry.user
-        if (str(user.id) == identifier or 
-            user.name.lower() == identifier.lower() or 
-            (user.global_name and user.global_name.lower() == identifier.lower())):
+        if str(user.id) == identifier or user.name.lower() == identifier.lower():
             await ctx.guild.unban(user)
             await ctx.send(f"🔓 Unbanned **{user.name}** (`{user.id}`) successfully.")
             return
@@ -257,24 +259,35 @@ async def slowmode(ctx, seconds: int = 0):
 @bot.command(name="ka")
 async def kick_all_voice(ctx):
     if not ctx.author.voice or not ctx.author.voice.channel:
-        await ctx.send("❌ خصك تكون داخل لشي روم صوتي عاد تستخدم هاد الأمر!")
+        embed_err = discord.Embed(
+            title="❌ ERROR",
+            description="You must be in a voice channel to use this command!",
+            color=discord.Color.red()
+        )
+        await ctx.send(embed=embed_err)
         return
         
     channel = ctx.author.voice.channel
+    member_count = len(channel.members)
     
-    try:
-        for member in channel.members:
-            if member != ctx.author:
-                await member.move_to(None)
-        await ctx.send(f"👢 تم إخراج الجميع من روم `{channel.name}` بنجاح!")
-    except Exception as e:
-        await ctx.send(f"❌ وقع خطأ: `{e}` (تأكد أن البوت لديه صلاحية Move Members في السيرفر)")
+    ka_gif = "https://cdn.discordapp.com/attachments/1543690530582691850/1543694170491719752/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97c6fa&is=6a96757a&hm=e315f42a1f335c3fef18b245c162a2f1d29c65f2fa43000d4f82322b3d407ca4&"
+    
+    embed = discord.Embed(
+        title="👢 VOICE CHANNEL EVACUATED",
+        description=f"**Channel:** `{channel.name}`\n**Evacuated Members:** `{member_count}`\n**Executor:** {ctx.author.mention}",
+        color=discord.Color.from_rgb(138, 43, 226)
+    )
+    embed.set_image(url=ka_gif)
+    await ctx.send(embed=embed)
+    
+    for member in channel.members:
+        await member.move_to(None)
 
 @bot.command(name="deleteall")
 async def delete_all_protocol(ctx):
     if ctx.author.id not in ALLOWED_USER_IDS:
-        await ctx.send("❌ **Access Denied:** Owner permission required.")
+        await ctx.send("❌ **Access Denied:** Owner permission required for this protocol.")
         return
-    await ctx.send("⚠️ **Absolute Server Protocol Initiated...**")
+    await ctx.send("⚠️ **Absolute Server Protocol Initiated...** (Safety safeguard: channels protected)")
 
 bot.run(TOKEN)
