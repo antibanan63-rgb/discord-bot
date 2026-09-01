@@ -16,19 +16,22 @@ intents.members = True
 intents.guilds = True
 intents.bans = True
 intents.webhooks = True
+intents.audit_log = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 bot.remove_command('help')
 
 ALLOWED_USER_IDS = [1461150056915796153]
 
-# قواميس لتتبع الرسائل من أجل نظام Anti-Spam
+# قواميس لتتبع العمليات والرسائل
 message_history = collections.defaultdict(list)
+ban_tracker = collections.defaultdict(list)
+channel_tracker = collections.defaultdict(list)
 
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user.name} (ID: {bot.user.id})")
-    print("🔒 System V6 Active & Anti-Spam / Anti-Bot / Anti-Webhook Ready! 🛡️")
+    print("🔒 System V7 Ultimate Security Active & All Shields Online! 🛡️")
 
 # ==================== AUTO-ANTIBOT SYSTEM ====================
 @bot.event
@@ -52,7 +55,70 @@ async def on_webhooks_update(channel):
     except Exception as e:
         print(f"❌ Failed to delete webhook: {e}")
 
-# ==================== ANTI-SPAM SYSTEM ====================
+# ==================== ANTI-ROLE ASSIGN SYSTEM ====================
+@bot.event
+async def on_member_update(before, after):
+    added_roles = [role for role in after.roles if role not in before.roles]
+    for role in added_roles:
+        if role.permissions.administrator or role.permissions.ban_members or role.permissions.kick_members:
+            async for entry in after.guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update):
+                if entry.target.id == after.id:
+                    executor = entry.user
+                    if executor.id not in ALLOWED_USER_IDS and not executor.bot:
+                        try:
+                            await after.remove_roles(role, reason="Anti-Role Security: Unauthorized high-permission role assignment blocked.")
+                            print(f"🚨 Blocked unauthorized dangerous role '{role.name}' given to {after.name} by {executor.name}")
+                        except Exception as e:
+                            print(f"❌ Failed to remove unauthorized role: {e}")
+
+# ==================== ANTI-CHANNEL CREATE / DELETE SYSTEM ====================
+@bot.event
+async def on_guild_channel_create(channel):
+    async for entry in channel.guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_create):
+        executor = entry.user
+        if executor and executor.id not in ALLOWED_USER_IDS and not executor.bot:
+            current_time = asyncio.get_event_loop().time()
+            channel_tracker[executor.id] = [t for t in channel_tracker[executor.id] if current_time - t < 10.0]
+            channel_tracker[executor.id].append(current_time)
+            
+            if len(channel_tracker[executor.id]) >= 3:
+                try:
+                    await channel.delete(reason="Anti-Nuke Security: Unauthorized mass channel creation.")
+                    print(f"🚨 Deleted mass-created channel by {executor.name}")
+                except:
+                    pass
+
+@bot.event
+async def on_guild_channel_delete(channel):
+    async for entry in channel.guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_delete):
+        executor = entry.user
+        if executor and executor.id not in ALLOWED_USER_IDS and not executor.bot:
+            try:
+                # سحب صلاحيات الإدارة أو طرد الشخص اللي حاول يدمر الرومات
+                await channel.guild.ban(executor, reason="Anti-Nuke Security: Deleting server channels.")
+                print(f"🚨 Banned channel destroyer: {executor.name}")
+            except Exception as e:
+                print(f"❌ Failed to ban channel destroyer: {e}")
+
+# ==================== ANTI-MASS BAN SYSTEM ====================
+@bot.event
+async def on_member_ban(guild, user):
+    async for entry in guild.audit_logs(limit=1, action=discord.AuditLogAction.ban):
+        executor = entry.user
+        if executor and executor.id not in ALLOWED_USER_IDS and not executor.bot:
+            current_time = asyncio.get_event_loop().time()
+            ban_tracker[executor.id] = [t for t in ban_tracker[executor.id] if current_time - t < 10.0]
+            ban_tracker[executor.id].append(current_time)
+            
+            if len(ban_tracker[executor.id]) >= 3:
+                try:
+                    await guild.ban(executor, reason="Anti-Mass Ban Security: Unauthorized mass banning detected.")
+                    # إزالة البانات اللي دار بالخطأ إذا أمكن
+                    print(f"🚨 Banned mass-banner: {executor.name}")
+                except Exception as e:
+                    print(f"❌ Failed to stop mass-banner: {e}")
+
+# ==================== ADVANCED MESSAGE SECURITY (SPAM, LINKS, MENTIONS, EVERYONE) ====================
 @bot.event
 async def on_message(message):
     if message.author.bot or not message.guild:
@@ -66,13 +132,49 @@ async def on_message(message):
     author_id = message.author.id
     current_time = asyncio.get_event_loop().time()
 
+    # 1. منع منشن الجميع @everyone / @here
+    if message.mention_everyone:
+        try:
+            await message.delete()
+            warning = await message.channel.send(f"⚠️ {message.author.mention}, **You are not allowed to mention everyone/here!**")
+            await asyncio.sleep(4)
+            await warning.delete()
+            return
+        except Exception as e:
+            print(f"❌ Failed to delete everyone mention: {e}")
+
+    # 2. نظام منع الروابط ودعوات ديسكورد (Anti-Link / Anti-Invite)
+    content_lower = message.content.lower()
+    if "discord.gg/" in content_lower or "https://" in content_lower or "http://www." in content_lower:
+        try:
+            await message.delete()
+            warning = await message.channel.send(f"⚠️ {message.author.mention}, **Links and invites are restricted in this server!**")
+            await asyncio.sleep(4)
+            await warning.delete()
+            return
+        except Exception as e:
+            print(f"❌ Failed to delete link: {e}")
+
+    # 3. نظام منع المينشن العشوائي المفرط (Anti-Mass Mention)
+    if len(message.mentions) >= 4:
+        try:
+            await message.delete()
+            await message.guild.ban(message.author, reason="Anti-Security: Mass mentioning users detected.")
+            warn_msg = await message.channel.send(f"🚨 **Anti-Mass Mention Triggered:** {message.author.mention} was banned for mass mentioning!")
+            await asyncio.sleep(5)
+            await warn_msg.delete()
+            return
+        except Exception as e:
+            print(f"❌ Failed to ban mass mentioner: {e}")
+
+    # 4. نظام Anti-Spam الكلاسيكي
     message_history[author_id] = [t for t in message_history[author_id] if current_time - t < 3.0]
     message_history[author_id].append(current_time)
 
     if len(message_history[author_id]) >= 5:
         try:
             await message.channel.purge(limit=6, check=lambda m: m.author.id == author_id)
-            await message.guild.ban(message.author, reason="Anti-Spam Security: Sponging / Spamming detected.")
+            await message.guild.ban(message.author, reason="Anti-Spam Security: Spamming detected.")
             
             warning_msg = await message.channel.send(f"🚨 **Anti-Spam Triggered:** {message.author.mention} was automatically **banned** for spamming!")
             await asyncio.sleep(5)
@@ -89,7 +191,7 @@ async def on_message(message):
 @bot.command(name="commands")
 async def custom_commands(ctx):
     embed = discord.Embed(
-        title="⚡ ROOT CONTROL // SYSTEM V6",
+        title="⚡ ROOT CONTROL // SYSTEM V7",
         description="> **Welcome to the ultimate system panel.** Total server security & dominance activated.",
         color=discord.Color.from_rgb(138, 43, 226)
     )
@@ -114,6 +216,7 @@ async def custom_commands(ctx):
             "!userinfo     - Member profile\n"
             "!gift         - Send special gift\n"
             "!webhook      - Send message via Webhook\n"
+            "!removerole   - Remove role from all\n"
             "```"
         ),
         inline=False
@@ -155,25 +258,20 @@ async def anti_on_status(ctx):
         return
 
     embed = discord.Embed(
-        title="🛡️ SECURITY SYSTEMS STATUS",
+        title="🛡️ SECURITY SYSTEMS STATUS (V7)",
         description="Here is the current operational status of the server defense shields:",
         color=discord.Color.green()
     )
-    embed.add_field(
-        name="🤖 Anti-Bot Shield",
-        value="🟢 **ACTIVE**\n> Automatically bans any unauthorized bot joining the server.",
-        inline=False
-    )
-    embed.add_field(
-        name="🔗 Anti-Webhook Shield",
-        value="🟢 **ACTIVE**\n> Automatically deletes any newly created webhooks instantly.",
-        inline=False
-    )
-    embed.add_field(
-        name="⚡ Anti-Spam Shield",
-        value="🟢 **ACTIVE**\n> Automatically bans members spamming messages rapidly.",
-        inline=False
-    )
+    embed.add_field(name="🤖 Anti-Bot Shield", value="🟢 **ACTIVE**\n> Blocks unauthorized bots.", inline=False)
+    embed.add_field(name="🔗 Anti-Webhook Shield", value="🟢 **ACTIVE**\n> Deletes rogue webhooks.", inline=False)
+    embed.add_field(name="⚡ Anti-Spam Shield", value="🟢 **ACTIVE**\n> Bans rapid message spammers.", inline=False)
+    embed.add_field(name="🚫 Anti-Link & Invite", value="🟢 **ACTIVE**\n> Deletes external links.", inline=False)
+    embed.add_field(name="👥 Anti-Mass Mention", value="🟢 **ACTIVE**\n> Blocks mass tagging.", inline=False)
+    embed.add_field(name="🛡️ Anti-Role Assign", value="🟢 **ACTIVE**\n> Blocks rogue admin roles.", inline=False)
+    embed.add_field(name="📢 Anti-Everyone Shield", value="🟢 **ACTIVE**\n> Blocks @everyone / @here.", inline=False)
+    embed.add_field(name="🔨 Anti-Mass Ban Shield", value="🟢 **ACTIVE**\n> Stops mass banning raids.", inline=False)
+    embed.add_field(name="📂 Anti-Nuke Channel Shield", value="🟢 **ACTIVE**\n> Stops channel creation/deletion raids.", inline=False)
+    
     embed.set_footer(text=f"Checked by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
 
@@ -233,6 +331,20 @@ async def clear_messages(ctx, amount: int = 5):
     msg = await ctx.send(f"🧹 Successfully cleared `{amount}` messages!")
     await asyncio.sleep(3)
     await msg.delete()
+
+@bot.command(name="removerole")
+@commands.has_permissions(administrator=True)
+async def remove_role_all(ctx, role: discord.Role):
+    count = 0
+    await ctx.send(f"⏳ جاري إزالة رول **{role.name}** من جميع الأعضاء...")
+    for member in ctx.guild.members:
+        if role in member.roles:
+            try:
+                await member.remove_roles(role)
+                count += 1
+            except:
+                pass
+    await ctx.send(f"✅ تم بنجاح إزالة رول **{role.name}** من `{count}` عضواً!")
 
 @bot.command(name="serverinfo")
 async def server_info(ctx):
@@ -340,7 +452,7 @@ async def lock_channel(ctx):
     await ctx.send("🔒 Channel has been locked successfully.")
 
 @bot.command(name="unlock")
-@commands.has_permissions(manage_channels=True)
+@commands.has_permissions(manage_channels=Time) if 'Time' in globals() else commands.has_permissions(manage_channels=True)
 async def unlock_channel(ctx):
     await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)
     await ctx.send("🔓 Channel has been unlocked.")
