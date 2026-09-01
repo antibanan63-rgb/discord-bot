@@ -24,13 +24,13 @@ bot.remove_command('help')
 
 ALLOWED_USER_IDS = [1461150056915796153]
 
-# تتبع العمليات والحمايات
+# Tracking dictionaries for security systems
 message_history = collections.defaultdict(list)
 ban_history = collections.defaultdict(list)
 channel_delete_history = collections.defaultdict(list)
 role_delete_history = collections.defaultdict(list)
 
-# إعدادات الموسيقى YTDL
+# YTDL Music Settings
 YTDL_OPTIONS = {
     'format': 'bestaudio/best',
     'extractaudio': True,
@@ -238,11 +238,15 @@ async def anti_on_status(ctx):
 
 # ==================== MUSIC SYSTEM COMMANDS 🎵 ====================
 @bot.command(name="play")
-async def play_music(ctx, *, search: str):
+async def play_music(ctx, *, search: str = None):
     if not ctx.author.voice:
         await ctx.send("❌ You need to be in a voice channel first!")
         return
         
+    if not search:
+        await ctx.send("❌ Please provide a song name. Example: `!play Lacrim`")
+        return
+
     voice_channel = ctx.author.voice.channel
     
     if not ctx.voice_client:
@@ -256,12 +260,19 @@ async def play_music(ctx, *, search: str):
         loop = asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(f"ytsearch:{search}", download=False))
         
-        if 'entries' in data:
+        if 'entries' in data and data['entries']:
             data = data['entries'][0]
+        else:
+            await msg.edit(content="❌ No results found for this search!")
+            return
             
-        song_title = data.get('title')
+        song_title = data.get('title', 'Unknown Title')
         song_url = data.get('url')
         
+        if not song_url:
+            await msg.edit(content="❌ Error extracting the song URL.")
+            return
+            
         if ctx.voice_client.is_playing():
             ctx.voice_client.stop()
             
@@ -271,7 +282,7 @@ async def play_music(ctx, *, search: str):
         await msg.edit(content=None, embed=embed)
         
     except Exception as e:
-        await msg.edit(content=f"❌ Error playing the song: `{str(e)[:100]}`")
+        await msg.edit(content=f"❌ An error occurred while playing the song: `{str(e)[:100]}`")
 
 @bot.command(name="stop")
 async def stop_music(ctx):
@@ -425,7 +436,7 @@ async def unban_member(ctx, user_id: int):
     except discord.NotFound:
         await ctx.send("❌ User not found in ban list or invalid ID.")
     except Exception as e:
-        await ctx.send(f"❌ وقع خطأ: `{e}`")
+        await ctx.send(f"❌ An error occurred: `{e}`")
 
 @bot.command(name="kick")
 @commands.has_permissions(kick_members=True)
