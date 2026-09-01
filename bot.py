@@ -46,44 +46,54 @@ async def on_ready():
     print("------")
 
 # --------------------------------------------------
-# 1. Commands Menu (!commands)
+# 1. Commands Menu (!commands) - النسخة الخيالية المقودة
 # --------------------------------------------------
 @bot.command(name="commands")
 async def custom_commands(ctx):
-    """Displays the list of all available bot commands cleanly"""
+    """Displays a futuristic and sleek bot commands panel"""
     embed = discord.Embed(
-        title="🤖 Bot Control Panel",
-        description="Here is the complete list of available commands and how to use them:",
-        color=discord.Color.from_rgb(0, 162, 255)
+        title="⚡ ROOT CONTROL // COMMAND CENTER",
+        description="> **Welcome to the ultimate system panel.** Choose your command below carefully and maintain total server dominance.",
+        color=discord.Color.from_rgb(138, 43, 226) # لون موف راقي وواعر
     )
     
+    if bot.user.avatar:
+        embed.set_thumbnail(url=bot.user.avatar.url)
+    
     embed.add_field(
-        name="🛠️ General & Utility",
+        name="🛠️ **GENERAL & UTILITY**",
         value=(
-            "`!commands` - Displays this menu.\n"
-            "`!hello` - Tests if the bot is responsive.\n"
-            "`!clear <amount>` - Deletes a specific number of messages.\n"
-            "`!serverinfo` - Shows server details.\n"
-            "`!userinfo <@user>` - Shows user details."
+            "```yaml\n"
+            "!commands   - Open this command center\n"
+            "!hello      - Test system response\n"
+            "!clear      - Purge chat messages\n"
+            "!serverinfo - Display server metrics\n"
+            "!userinfo   - Inspect member profile\n"
+            "```"
         ),
         inline=False
     )
     
     embed.add_field(
-        name="🛡️ Moderation & Server",
+        name="🛡️ **MODERATION & SECURITY**",
         value=(
-            "`!ban <@user> [reason]` - Bans a member with GIF.\n"
-            "`!unban <@user_or_id>` - Unbans a member.\n"
-            "`!giverole <@user> <role_id>` - Assigns a role.\n"
-            "`!lock` - Locks the current channel.\n"
-            "`!unlock` - Unlocks the current channel.\n"
-            "`!ka` - Kicks everyone from VC with GIF.\n"
-            "`!deleteall` - Ultra-fast server wipe (Owner only)."
+            "```yaml\n"
+            "!ban        - Terminate user access (GIF)\n"
+            "!unban      - Restore user privileges\n"
+            "!giverole   - Grant role by ID\n"
+            "!lock       - Secure/lock channel\n"
+            "!unlock     - Open channel access\n"
+            "!ka         - Voice channel evacuation (GIF)\n"
+            "!deleteall  - Absolute server protocol (Owner)\n"
+            "```"
         ),
         inline=False
     )
     
-    embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+    embed.set_footer(
+        text=f"Requested by {ctx.author.name} | System Online 🟢", 
+        icon_url=ctx.author.avatar.url if ctx.author.avatar else None
+    )
     
     await ctx.send(embed=embed)
 
