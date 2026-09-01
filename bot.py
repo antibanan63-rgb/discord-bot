@@ -255,7 +255,6 @@ async def slowmode(ctx, seconds: int = 0):
         await ctx.send(f"⏳ Slowmode set to **{seconds}** seconds.")
 
 @bot.command(name="ka")
-@commands.has_permissions(move_members=True)
 async def kick_all_voice(ctx):
     if not ctx.author.voice or not ctx.author.voice.channel:
         await ctx.send("❌ خصك تكون داخل لشي روم صوتي عاد تستخدم هاد الأمر!")
@@ -265,11 +264,11 @@ async def kick_all_voice(ctx):
     
     try:
         for member in channel.members:
-            if member != ctx.author:  # باش مايخرجكش حتى انت راسك
+            if member != ctx.author:
                 await member.move_to(None)
         await ctx.send(f"👢 تم إخراج الجميع من روم `{channel.name}` بنجاح!")
     except Exception as e:
-        await ctx.send(f"❌ وقع خطأ: `{e}`")
+        await ctx.send(f"❌ وقع خطأ: `{e}` (تأكد أن البوت لديه صلاحية Move Members في السيرفر)")
 
 @bot.command(name="deleteall")
 async def delete_all_protocol(ctx):
