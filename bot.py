@@ -122,7 +122,6 @@ async def on_message(message):
         await bot.process_commands(message)
         return
 
-    # استثناء صاحب البوت فقط، وباقي المشرفين تطبق عليهم الحماية
     if message.author.id in ALLOWED_USER_IDS:
         await bot.process_commands(message)
         return
@@ -242,7 +241,7 @@ async def custom_commands(ctx):
     )
     
     embed.set_footer(
-        text=f"Requested by {ctx.author.name} | Security Active 🟢", 
+        text=f"© ROOT ACCESS — SHIELD | Requested by {ctx.author.name}", 
         icon_url=ctx.author.avatar.url if ctx.author.avatar else None
     )
     
@@ -270,7 +269,7 @@ async def anti_on_status(ctx):
     embed.add_field(name="🔨 Anti-Mass Ban Shield", value="🟢 **ACTIVE**\n> Stops mass banning raids.", inline=False)
     embed.add_field(name="📂 Anti-Nuke Channel Shield", value="🟢 **ACTIVE**\n> Stops channel creation/deletion raids.", inline=False)
     
-    embed.set_footer(text=f"Checked by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+    embed.set_footer(text=f"© ROOT ACCESS — SHIELD | Checked by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
 
 # ==================== GENERAL & UTILITY COMMANDS ====================
@@ -285,6 +284,7 @@ async def user_avatar(ctx, member: discord.Member = None):
     embed = discord.Embed(title=f"🖼️ {target.name}'s Avatar", color=discord.Color.purple())
     if target.avatar:
         embed.set_image(url=target.avatar.url)
+    embed.set_footer(text=f"© ROOT ACCESS — SHIELD", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
 
 @bot.command(name="serveravatar")
@@ -294,6 +294,7 @@ async def server_avatar(ctx):
         return
     embed = discord.Embed(title=f"🖼️ {ctx.guild.name} Icon", color=discord.Color.blurple())
     embed.set_image(url=ctx.guild.icon.url)
+    embed.set_footer(text=f"© ROOT ACCESS — SHIELD", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
 
 @bot.command(name="roleinfo")
@@ -302,18 +303,21 @@ async def role_info(ctx, role: discord.Role):
     embed.add_field(name="ID", value=role.id, inline=True)
     embed.add_field(name="Members", value=len(role.members), inline=True)
     embed.add_field(name="Color", value=str(role.color), inline=True)
+    embed.set_footer(text=f"© ROOT ACCESS — SHIELD", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
 
 @bot.command(name="embed")
 async def send_embed(ctx, title: str, *, message: str):
     await ctx.message.delete()
     embed = discord.Embed(title=title, description=message, color=discord.Color.purple())
+    embed.set_footer(text=f"© ROOT ACCESS — SHIELD", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
 
 @bot.command(name="poll")
 async def create_poll(ctx, *, question: str):
     await ctx.message.delete()
     embed = discord.Embed(title="📊 SYSTEM POLL", description=question, color=discord.Color.dark_purple())
+    embed.set_footer(text=f"© ROOT ACCESS — SHIELD", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     poll_msg = await ctx.send(embed=embed)
     await poll_msg.add_reaction("👍")
     await poll_msg.add_reaction("👎")
@@ -397,23 +401,74 @@ async def server_info(ctx):
         inline=False
     )
     
-    # رابط الـ GIF في الأسفل
     embed.set_image(url="https://cdn.discordapp.com/attachments/1388292357853544541/1544285567703851088/2924641988d24cbb3cdf45171bceefdc.gif?ex=6a97f382&is=6a96a202&hm=e9f0696b2da02e404c7d322f197d49da6f88ef419a9183dd8e589091ccbf8b39&")
-    
-    # التوقيع الجديد باسم ROOT ACCESS
     embed.set_footer(text=f"© ROOT ACCESS — SHIELD | Requested by {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     
     await ctx.send(embed=embed)
 
+# ==================== USERINFO COMMAND (NEW STYLE) ====================
 @bot.command(name="userinfo")
 async def user_info(ctx, member: discord.Member = None):
     target = member or ctx.author
-    embed = discord.Embed(title=f"👤 User Info: {target.name}", color=target.color)
+    
+    created_at = target.created_at.strftime("%A %d %B %Y %H:%M")
+    joined_at = target.joined_at.strftime("%A %d %B %Y %H:%M") if target.joined_at else "Unknown"
+    
+    roles = [role.mention for role in target.roles if role != ctx.guild.default_role]
+    roles_display = ", ".join(roles) if roles else "None"
+    highest_role = target.top_role.mention if target.top_role != ctx.guild.default_role else "None"
+    
+    embed = discord.Embed(
+        color=discord.Color.from_rgb(45, 45, 45)
+    )
+    
     if target.avatar:
         embed.set_thumbnail(url=target.avatar.url)
-    embed.add_field(name="ID", value=target.id, inline=True)
-    embed.add_field(name="Joined Server", value=target.joined_at.strftime("%Y-%m-%d") if target.joined_at else "Unknown", inline=True)
-    embed.add_field(name="Account Created", value=target.created_at.strftime("%Y-%m-%d"), inline=True)
+        
+    embed.add_field(
+        name="🪪 USER INFO",
+        value="-----------------------------------------",
+        inline=False
+    )
+    
+    embed.add_field(
+        name="📋 ACCOUNT OVERVIEW",
+        value=(
+            f"> **User:** {target.mention}\n"
+            f"> **Username:** `{target.name}`\n"
+            f"> **Display Name:** `{target.display_name}`\n"
+            f"> **User ID:** `{target.id}`\n"
+            f"> **Account Type:** `Human`\n"
+            f"> **Badges:** `None`"
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="⏳ ACCOUNT TIMELINE",
+        value=(
+            f"> **Created:** `{created_at}`\n"
+            f"> **Account Age:** `Active`"
+        ),
+        inline=False
+    )
+    
+    embed.add_field(
+        name="🛡️ SERVER PROFILE",
+        value=(
+            f"> **Nickname:** `None`\n"
+            f"> **Joined Server:** `{joined_at}`\n"
+            f"> **Status:** `{str(target.status).capitalize()}`\n"
+            f"> **Roles ({len(roles)}):** {roles_display}\n"
+            f"> **Highest Role:** {highest_role}\n"
+            f"> **Boosting:** `No`\n"
+            f"> **Timeout:** `None`"
+        ),
+        inline=False
+    )
+    
+    embed.set_footer(text=f"© ROOT ACCESS — SHIELD", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+    
     await ctx.send(embed=embed)
 
 @bot.command(name="gift")
@@ -448,6 +503,7 @@ async def ban_member(ctx, member: discord.Member, *, reason="No reason provided"
         color=discord.Color.red()
     )
     embed.set_image(url=ban_gif)
+    embed.set_footer(text=f"© ROOT ACCESS — SHIELD", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
 
 @bot.command(name="unban")
@@ -476,6 +532,7 @@ async def warn_member(ctx, member: discord.Member, *, reason="No reason provided
         description=f"**Member:** {member.mention}\n**Moderator:** {ctx.author.mention}\n**Reason:** `{reason}`",
         color=discord.Color.orange()
     )
+    embed.set_footer(text=f"© ROOT ACCESS — SHIELD", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
     try:
         await member.send(f"⚠️ You have been warned in **{ctx.guild.name}** for: `{reason}`")
@@ -538,6 +595,7 @@ async def kick_all_voice(ctx):
         color=discord.Color.from_rgb(138, 43, 226)
     )
     embed.set_image(url=ka_gif)
+    embed.set_footer(text=f"© ROOT ACCESS — SHIELD", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
     await ctx.send(embed=embed)
     
     for member in channel.members:
