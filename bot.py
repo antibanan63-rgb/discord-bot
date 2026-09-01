@@ -16,7 +16,6 @@ intents.members = True
 intents.guilds = True
 intents.bans = True
 intents.webhooks = True
-# تم حذف intents.audit_log لأنه غير موجود في المكتبة ويسبب خطأ
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 bot.remove_command('help')
@@ -123,7 +122,8 @@ async def on_message(message):
         await bot.process_commands(message)
         return
 
-    if message.author.id in ALLOWED_USER_IDS or message.author.guild_permissions.administrator:
+    # استثناء صاحب البوت فقط، وباقي المشرفين تطبق عليهم الحماية
+    if message.author.id in ALLOWED_USER_IDS:
         await bot.process_commands(message)
         return
 
@@ -450,6 +450,7 @@ async def lock_channel(ctx):
     await ctx.send("🔒 Channel has been locked successfully.")
 
 @bot.command(name="unlock")
+@commands.has_permissions(manage_channels=True)
 async def unlock_channel(ctx):
     await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)
     await ctx.send("🔓 Channel has been unlocked.")
