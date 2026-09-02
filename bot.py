@@ -29,7 +29,7 @@ ban_tracker = collections.defaultdict(list)
 channel_tracker = collections.defaultdict(list)
 
 # رابط GIF الرئيسي
-MENU_GIF_URL = "https://cdn.discordapp.com/attachments/1544326452638388265/1544573293980549193/e0f0a0c3b6bdc0ca18b96ff3738ca347.gif?ex=6a98ff7a&is=6a97adfa&hm=1b99b614f12ce1cebd14bdb41731aadf03f8adf8e92eb609ef765c9f013bf879&"
+MENU_GIF_URL = "https://cdn.discordapp.com/attachments/1543270990962753576/1544253396675203102/1f825152819d7f3576c3dfbf1c810cbe.gif"
 
 
 @bot.event
@@ -344,7 +344,7 @@ class CommandDropdown(discord.ui.Select):
         discord.SelectOption(
             label="Moderation & Security",
             description="View moderation and security defense commands",
-            emoji=discord.PartialEmoji(name="2_", id=1544557232518332489),
+            emoji=discord.PartialEmoji(name="3_", id=1544740764309786694),
             value="security",
         ),
     ]
@@ -386,7 +386,7 @@ class CommandDropdown(discord.ui.Select):
 
     elif self.values[0] == "security":
       embed = discord.Embed(
-          title="<:2_:1544557232518332489> MODERATION & SECURITY COMMANDS",
+          title="<:3_:1544740764309786694> MODERATION & SECURITY COMMANDS",
           description=(
               "```yaml\n"
               "!ban           - Ban user with GIF\n"
@@ -448,7 +448,7 @@ async def custom_commands(ctx):
 @bot.command(name="anti-on")
 async def anti_on_status(ctx):
   embed = discord.Embed(
-      title="<:2_:1544557232518332489> SECURITY SYSTEMS STATUS (V7)",
+      title="<:3_:1544740764309786694> SECURITY SYSTEMS STATUS (V7)",
       description=(
           "Here is the current operational status of the server defense"
           " shields:"
@@ -481,7 +481,7 @@ async def anti_on_status(ctx):
       inline=False,
   )
   embed.add_field(
-      name="<:2_:1544557232518332489> Anti-Role Assign",
+      name="<:3_:1544740764309786694> Anti-Role Assign",
       value="🟢 **ACTIVE**\n> Blocks rogue admin roles.",
       inline=False,
   )
