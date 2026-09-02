@@ -457,53 +457,67 @@ async def anti_on_status(ctx):
   )
   embed.add_field(
       name="🤖 Anti-Bot Shield",
-      value="<:2_:1544557232518332489> **ACTIVE**\n> Blocks unauthorized bots.",
+      value=(
+          "<:4_:1544743320742531092> **ACTIVE**\n> Blocks unauthorized"
+          " bots."
+      ),
       inline=False,
   )
   embed.add_field(
       name="🔗 Anti-Webhook Shield",
-      value="<:2_:1544557232518332489> **ACTIVE**\n> Deletes rogue webhooks.",
+      value=(
+          "<:4_:1544743320742531092> **ACTIVE**\n> Deletes rogue webhooks."
+      ),
       inline=False,
   )
   embed.add_field(
       name="⚡ Anti-Spam Shield",
       value=(
-          "<:2_:1544557232518332489> **ACTIVE**\n> Bans rapid message"
+          "<:4_:1544743320742531092> **ACTIVE**\n> Bans rapid message"
           " spammers."
       ),
       inline=False,
   )
   embed.add_field(
       name="🚫 Anti-Link & Invite",
-      value="<:2_:1544557232518332489> **ACTIVE**\n> Deletes external links.",
+      value=(
+          "<:4_:1544743320742531092> **ACTIVE**\n> Deletes external links."
+      ),
       inline=False,
   )
   embed.add_field(
       name="👥 Anti-Mass Mention",
-      value="<:2_:1544557232518332489> **ACTIVE**\n> Blocks mass tagging.",
+      value=(
+          "<:4_:1544743320742531092> **ACTIVE**\n> Blocks mass tagging."
+      ),
       inline=False,
   )
   embed.add_field(
       name="<:1_:1544558017939243078> Anti-Role Assign",
-      value="<:2_:1544557232518332489> **ACTIVE**\n> Blocks rogue admin roles.",
+      value=(
+          "<:4_:1544743320742531092> **ACTIVE**\n> Blocks rogue admin"
+          " roles."
+      ),
       inline=False,
   )
   embed.add_field(
       name="📢 Anti-Everyone Shield",
       value=(
-          "<:2_:1544557232518332489> **ACTIVE**\n> Blocks @everyone / @here."
+          "<:4_:1544743320742531092> **ACTIVE**\n> Blocks @everyone / @here."
       ),
       inline=False,
   )
   embed.add_field(
       name="🔨 Anti-Mass Ban Shield",
-      value="<:2_:1544557232518332489> **ACTIVE**\n> Stops mass banning raids.",
+      value=(
+          "<:4_:1544743320742531092> **ACTIVE**\n> Stops mass banning raids."
+      ),
       inline=False,
   )
   embed.add_field(
       name="📂 Anti-Nuke Channel Shield",
       value=(
-          "<:2_:1544557232518332489> **ACTIVE**\n> Instantly bans anyone"
+          "<:4_:1544743320742531092> **ACTIVE**\n> Instantly bans anyone"
           " deleting channels."
       ),
       inline=False,
@@ -511,7 +525,7 @@ async def anti_on_status(ctx):
   embed.add_field(
       name="🔒 Anti-Tamper & Bot Shield",
       value=(
-          "<:2_:1544557232518332489> **ACTIVE**\n> Protects bot roles &"
+          "<:4_:1544743320742531092> **ACTIVE**\n> Protects bot roles &"
           " instantly bans tamperers."
       ),
       inline=False,
