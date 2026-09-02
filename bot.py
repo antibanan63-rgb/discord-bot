@@ -315,23 +315,22 @@ async def on_message(message):
   await bot.process_commands(message)
 
 
-# ==================== COMMAND CENTER PANEL (SELECT MENU) ====================
+# ==================== COMMAND CENTER PANEL (SELECT MENU - ENGLISH) ====================
 
 
-# 1. إنشاء القائمة المنسقة للأوامر
 class CommandDropdown(discord.ui.Select):
 
   def __init__(self):
     options = [
         discord.SelectOption(
             label="General & Utility",
-            description="عرض أوامر العامة والأدوات المساعدة",
+            description="View general commands and utility tools",
             emoji="🛠️",
             value="general",
         ),
         discord.SelectOption(
             label="Moderation & Security",
-            description="عرض أوامر الحماية والإشراف",
+            description="View moderation and security defense commands",
             emoji="🛡️",
             value="security",
         ),
@@ -393,7 +392,6 @@ class CommandDropdown(discord.ui.Select):
       await interaction.response.edit_message(embed=embed)
 
 
-# 2. الواجهة التفاعلية (View)
 class CommandView(discord.ui.View):
 
   def __init__(self):
@@ -401,15 +399,14 @@ class CommandView(discord.ui.View):
     self.add_item(CommandDropdown())
 
 
-# 3. أمر الـ commands الرئيسي
 @bot.command(name="commands")
 async def custom_commands(ctx):
   embed = discord.Embed(
       title="⚡ ROOT CONTROL // SYSTEM V7",
       description=(
           "> **Welcome to the ultimate system panel.** Total server security"
-          " & dominance activated.\n\n👇 **اختر القسم من القائمة أدناه لعرض"
-          " الأوامر الخاصة به:**"
+          " & dominance activated.\n\n👇 **Select a category from the dropdown"
+          " menu below to view its commands:**"
       ),
       color=discord.Color.from_rgb(138, 43, 226),
   )
@@ -601,7 +598,7 @@ async def clear_messages(ctx, amount: int = 5):
 @commands.has_permissions(administrator=True)
 async def remove_role_all(ctx, role: discord.Role):
   count = 0
-  await ctx.send(f"⏳ جاري إزالة رول **{role.name}** من جميع الأعضاء...")
+  await ctx.send(f"⏳ Removing role **{role.name}** from all members...")
   for member in ctx.guild.members:
     if role in member.roles:
       try:
@@ -609,7 +606,9 @@ async def remove_role_all(ctx, role: discord.Role):
         count += 1
       except:
         pass
-  await ctx.send(f"✅ تم بنجاح إزالة رول **{role.name}** من `{count}` عضواً!")
+  await ctx.send(
+      f"✅ Successfully removed role **{role.name}** from `{count}` members!"
+  )
 
 
 @bot.command(name="serverinfo")
@@ -800,7 +799,7 @@ async def unban_member(ctx, user_id: int):
   except discord.NotFound:
     await ctx.send("❌ User not found in ban list or invalid ID.")
   except Exception as e:
-    await ctx.send(f"❌ وقع خطأ: `{e}`")
+    await ctx.send(f"❌ An error occurred: `{e}`")
 
 
 @bot.command(name="kick")
