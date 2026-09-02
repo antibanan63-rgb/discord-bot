@@ -621,7 +621,7 @@ async def server_info(ctx):
   categories = len(guild.categories)
 
   embed = discord.Embed(
-      title="<:4_:1544743320742531092> Server Overview", color=discord.Color.from_rgb(200, 20, 20)
+      title="<:5_:1544750005338902588> Server Overview", color=discord.Color.from_rgb(200, 20, 20)
   )
 
   if guild.icon:
@@ -638,7 +638,7 @@ async def server_info(ctx):
   )
 
   embed.add_field(
-      name="<:6_:1544752813874090115> Server Overview",
+      name="<:4_:1544743320742531092> Members",
       value=(
           f"Total Members: **{guild.member_count}**\nOnline Members:"
           f" **{online_count}**\nHuman Members: **{humans_count}**\nBots:"
