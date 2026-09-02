@@ -344,7 +344,7 @@ class CommandDropdown(discord.ui.Select):
         discord.SelectOption(
             label="Moderation & Security",
             description="View moderation and security defense commands",
-            emoji=discord.PartialEmoji(name="2_", id=1544557333848395786),
+            emoji=discord.PartialEmoji(name="2_", id=1544557232518332489),
             value="security",
         ),
     ]
