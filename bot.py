@@ -358,7 +358,7 @@ class CommandDropdown(discord.ui.Select):
   async def callback(self, interaction: discord.Interaction):
     if self.values[0] == "general":
       embed = discord.Embed(
-          title="🛠️ GENERAL & UTILITY COMMANDS",
+          title="<:1_:1544558017939243078> GENERAL & UTILITY COMMANDS",
           description=(
               "```yaml\n"
               "!commands      - Open panel\n"
@@ -386,7 +386,7 @@ class CommandDropdown(discord.ui.Select):
 
     elif self.values[0] == "security":
       embed = discord.Embed(
-          title="🛡️ MODERATION & SECURITY COMMANDS",
+          title="<:2_:1544557232518332489> MODERATION & SECURITY COMMANDS",
           description=(
               "```yaml\n"
               "!ban           - Ban user with GIF\n"
@@ -448,7 +448,7 @@ async def custom_commands(ctx):
 @bot.command(name="anti-on")
 async def anti_on_status(ctx):
   embed = discord.Embed(
-      title="🛡️ SECURITY SYSTEMS STATUS (V7)",
+      title="<:2_:1544557232518332489> SECURITY SYSTEMS STATUS (V7)",
       description=(
           "Here is the current operational status of the server defense"
           " shields:"
@@ -481,7 +481,7 @@ async def anti_on_status(ctx):
       inline=False,
   )
   embed.add_field(
-      name="🛡️ Anti-Role Assign",
+      name="<:2_:1544557232518332489> Anti-Role Assign",
       value="🟢 **ACTIVE**\n> Blocks rogue admin roles.",
       inline=False,
   )
