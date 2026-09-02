@@ -338,13 +338,13 @@ class CommandDropdown(discord.ui.Select):
         discord.SelectOption(
             label="General & Utility",
             description="View general commands and utility tools",
-            emoji=discord.PartialEmoji(name="1_", id=1544558017939243078),
+            emoji=discord.PartialEmoji(name="1_", id=1544578500248408104),
             value="general",
         ),
         discord.SelectOption(
             label="Moderation & Security",
             description="View moderation and security defense commands",
-            emoji=discord.PartialEmoji(name="2_", id=1544557232518332489),
+            emoji=discord.PartialEmoji(name="2_", id=1544583196908580905),
             value="security",
         ),
     ]
@@ -870,7 +870,7 @@ async def kick_all_voice(ctx):
 
 
 @bot.command(name="deleteall")
-async def delete_all_protocol(ctx):
+async def delete_all_protocol(ctx: commands.Context):
   if ctx.author.id not in ALLOWED_USER_IDS:
     await ctx.send(
         "❌ **Access Denied:** Owner permission required for this protocol."
