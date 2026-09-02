@@ -29,7 +29,7 @@ ban_tracker = collections.defaultdict(list)
 channel_tracker = collections.defaultdict(list)
 
 # رابط GIF الرئيسي
-MENU_GIF_URL = "https://cdn.discordapp.com/attachments/1543270990962753576/1544253396675203102/1f825152819d7f3576c3dfbf1c810cbe.gif"
+MENU_GIF_URL = "https://cdn.discordapp.com/attachments/1544326452638388265/1544573293980549193/e0f0a0c3b6bdc0ca18b96ff3738ca347.gif?ex=6a98ff7a&is=6a97adfa&hm=1b99b614f12ce1cebd14bdb41731aadf03f8adf8e92eb609ef765c9f013bf879&"
 
 
 @bot.event
