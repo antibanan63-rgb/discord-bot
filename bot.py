@@ -353,14 +353,10 @@ class CommandDropdown(discord.ui.Select):
               "!avatar        - User avatar\n"
               "!serveravatar  - Server logo\n"
               "!roleinfo      - Role details\n"
-              "!embed         - Custom embed\n"
-              "!poll          - Voting poll\n"
               "!membercount   - Member count\n"
               "!clear         - Purge chat\n"
               "!serverinfo    - Server metrics\n"
               "!userinfo      - Member profile\n"
-              "!gift          - Send special gift\n"
-              "!webhook       - Send message via Webhook\n"
               "!removerole    - Remove role from all\n"
               "```"
           ),
@@ -550,34 +546,6 @@ async def role_info(ctx, role: discord.Role):
   await ctx.send(embed=embed)
 
 
-@bot.command(name="embed")
-async def send_embed(ctx, title: str, *, message: str):
-  await ctx.message.delete()
-  embed = discord.Embed(
-      title=title, description=message, color=discord.Color.purple()
-  )
-  embed.set_footer(
-      text="© ROOT ACCESS — SHIELD",
-      icon_url=ctx.author.avatar.url if ctx.author.avatar else None,
-  )
-  await ctx.send(embed=embed)
-
-
-@bot.command(name="poll")
-async def create_poll(ctx, *, question: str):
-  await ctx.message.delete()
-  embed = discord.Embed(
-      title="📊 SYSTEM POLL", description=question, color=discord.Color.dark_purple()
-  )
-  embed.set_footer(
-      text="© ROOT ACCESS — SHIELD",
-      icon_url=ctx.author.avatar.url if ctx.author.avatar else None,
-  )
-  poll_msg = await ctx.send(embed=embed)
-  await poll_msg.add_reaction("👍")
-  await poll_msg.add_reaction("👎")
-
-
 @bot.command(name="membercount")
 async def member_count(ctx):
   await ctx.send(
@@ -736,35 +704,6 @@ async def user_info(ctx, member: discord.Member = None):
   )
 
   await ctx.send(embed=embed)
-
-
-@bot.command(name="gift")
-async def gift_command(ctx, member: discord.Member = None):
-  await ctx.message.delete()
-  target = member or ctx.author
-  gift_gif = "https://cdn.discordapp.com/attachments/1388292357853544541/1544285567703851088/2924641988d24cbb3cdf45171bceefdc.gif?ex=6a97f382&is=6a96a202&hm=e9f0696b2da02e404c7d322f197d49da6f88ef419a9183dd8e589091ccbf8b39&"
-  await ctx.send(f"🎁 **SPECIAL GIFT RECEIVED for {target.mention}!**\n{gift_gif}")
-
-
-@bot.command(name="webhook")
-@commands.has_permissions(administrator=True)
-async def send_webhook(ctx, url: str, *, message: str):
-  await ctx.message.delete()
-  async with aiohttp.ClientSession() as session:
-    webhook = discord.Webhook.from_url(url, session=session)
-    try:
-      await webhook.send(
-          content=message,
-          username="Root Control System",
-          avatar_url=(
-              bot.user.avatar.url if bot.user.avatar else None
-          ),
-      )
-      await ctx.send(
-          "✅ Webhook message sent successfully!", delete_after=5
-      )
-    except Exception as e:
-      await ctx.send(f"❌ Failed to send webhook: `{e}`", delete_after=5)
 
 
 # ==================== MODERATION & SECURITY COMMANDS ====================
