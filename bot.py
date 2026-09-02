@@ -621,7 +621,7 @@ async def server_info(ctx):
   categories = len(guild.categories)
 
   embed = discord.Embed(
-      title="<:5_:1544750005338902588> Server Overview", color=discord.Color.from_rgb(200, 20, 20)
+      title="<:4_:1544743320742531092> Server Overview", color=discord.Color.from_rgb(200, 20, 20)
   )
 
   if guild.icon:
