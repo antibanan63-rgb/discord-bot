@@ -17,7 +17,7 @@ intents.guilds = True
 intents.bans = True
 intents.webhooks = True
 
-bot = commands.Bot(command_prefix="!", intents.intents)
+bot = commands.Bot(command_prefix="!", intents=intents)
 bot.remove_command("help")
 
 # الآيدي ديالك (مستثنى من جميع الحمايات، ويقدر يستعمل أمر anti-on ويتحكم بحرية)
@@ -434,7 +434,6 @@ async def custom_commands(ctx):
 # ==================== SECURITY CHECK COMMAND (Anti-On) ====================
 @bot.command(name="anti-on")
 async def anti_on_status(ctx):
-  # هاد الأمر كايخدم عادي ويطلع لجميع الأعضاء، ولكن الحمايات بوحدها لي مفوكتين ليك أنت
   embed = discord.Embed(
       title="🛡️ SECURITY SYSTEMS STATUS (V7)",
       description=(
