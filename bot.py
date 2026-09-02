@@ -28,8 +28,8 @@ message_history = collections.defaultdict(list)
 ban_tracker = collections.defaultdict(list)
 channel_tracker = collections.defaultdict(list)
 
-# رابط الـ GIF الصحيح والأصلي
-MENU_GIF_URL = "https://cdn.discordapp.com/attachments/1544326452638388265/1544552313920954378/e0f0a0c3b6bdc0ca18b96ff3738ca347.gif?ex=6a98ebf0&is=6a979a70&hm=2e3a71ec9c0b46925c751aa9bcb492c900c2301616b014028ad96842c8eadc41&"
+# رابط GIF الجديد وشغال مزيان
+MENU_GIF_URL = "https://cdn.discordapp.com/attachments/1543270990962753576/1544253396675203102/1f825152819d7f3576c3dfbf1c810cbe.gif"
 
 
 @bot.event
@@ -309,7 +309,7 @@ async def on_message(message):
   if len(message_history[author_id]) >= 5:
     try:
       await message.channel.purge(
-          limit=6, check=lambda m: m.author.id == author_id
+          limit=6, check=lambda m: m.author.ID == author_id
       )
       await message.guild.ban(
           message.author, reason="Anti-Spam Security: Spamming detected."
@@ -340,13 +340,13 @@ class CommandDropdown(discord.ui.Select):
         discord.SelectOption(
             label="General & Utility",
             description="View general commands and utility tools",
-            emoji="🛠️",
+            emoji="<:tools:1544558074474274816>",
             value="general",
         ),
         discord.SelectOption(
             label="Moderation & Security",
             description="View moderation and security defense commands",
-            emoji="🛡️",
+            emoji="<:shield:1544557232518332489>",  # إموجي الدرع الجديد بالآيدي المطلوب
             value="security",
         ),
     ]
@@ -853,7 +853,7 @@ async def kick_all_voice(ctx):
   ka_gif = "https://cdn.discordapp.com/attachments/1543270990962753576/1544253396675203102/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97d58c&is=6a96840c&hm=7d42ff83542aeb38a1ef030e6698301b9c0b88f7bfcd3f89e1577ec093fe5f7e&"
 
   embed = discord.Embed(
-      title=" VOICE CHANNEL EVACUATED",
+      title="👢 VOICE CHANNEL EVACUATED",
       description=(
           f"**Channel:** `{channel.name}`\n**Evacuated Members:**"
           f" `{member_count}`\n**Executor:** {ctx.author.mention}"
