@@ -621,7 +621,7 @@ async def server_info(ctx):
   categories = len(guild.categories)
 
   embed = discord.Embed(
-      title="<:5_:15447500005338902588> Server Overview", color=discord.Color.from_rgb(200, 20, 20)
+      title="<:5_:1544750005338902588> Server Overview", color=discord.Color.from_rgb(200, 20, 20)
   )
 
   if guild.icon:
@@ -630,7 +630,7 @@ async def server_info(ctx):
   embed.add_field(
       name="<:6_:1544752813874090115> Server Overview",
       value=(
-          f"Name: **{guild.name}**\nServer ID: `{guild.id}`\nOwner: 👑"
+          f"Name: **{guild.name}**\nServer ID: `{guild.id}`\nOwner: <:6_:1544752813874090115>"
           f" {guild.owner.mention if guild.owner else 'Unknown'}\nCreated:"
           f" `{guild.created_at.strftime('%A %d %B %Y %H:%M')}`"
       ),
