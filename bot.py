@@ -338,13 +338,13 @@ class CommandDropdown(discord.ui.Select):
         discord.SelectOption(
             label="General & Utility",
             description="View general commands and utility tools",
-            emoji="<:43923staffbadgecyan:1544558074474274816>",
+            emoji=discord.PartialEmoji(name="1_", id=1544558017939243078),
             value="general",
         ),
         discord.SelectOption(
             label="Moderation & Security",
             description="View moderation and security defense commands",
-            emoji="<:83513adminturquoise:1544558017939243078>",
+            emoji=discord.PartialEmoji(name="2_", id=1544557333848395786),
             value="security",
         ),
     ]
