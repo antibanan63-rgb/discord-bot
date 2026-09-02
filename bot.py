@@ -628,7 +628,7 @@ async def server_info(ctx):
     embed.set_thumbnail(url=guild.icon.url)
 
   embed.add_field(
-      name="<:6_:1544752813874090115> Server Overview",
+      name="<:5_:1544750005338902588> Server Details",
       value=(
           f"Name: **{guild.name}**\nServer ID: `{guild.id}`\nOwner: <:6_:1544752813874090115>"
           f" {guild.owner.mention if guild.owner else 'Unknown'}\nCreated:"
@@ -638,7 +638,7 @@ async def server_info(ctx):
   )
 
   embed.add_field(
-      name="<:4_:1544743320742531092> Members",
+      name="<:6_:1544752813874090115> Server Overview",
       value=(
           f"Total Members: **{guild.member_count}**\nOnline Members:"
           f" **{online_count}**\nHuman Members: **{humans_count}**\nBots:"
