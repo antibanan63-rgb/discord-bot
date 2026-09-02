@@ -338,13 +338,13 @@ class CommandDropdown(discord.ui.Select):
         discord.SelectOption(
             label="General & Utility",
             description="View general commands and utility tools",
-            emoji=discord.PartialEmoji(name="3_", id=1544740764309786694),
+            emoji=discord.PartialEmoji(name="1_", id=1544558017939243078),
             value="general",
         ),
         discord.SelectOption(
             label="Moderation & Security",
             description="View moderation and security defense commands",
-            emoji=discord.PartialEmoji(name="4_", id=1544743320742531092),
+            emoji=discord.PartialEmoji(name="2_", id=1544557232518332489),
             value="security",
         ),
     ]
@@ -358,7 +358,7 @@ class CommandDropdown(discord.ui.Select):
   async def callback(self, interaction: discord.Interaction):
     if self.values[0] == "general":
       embed = discord.Embed(
-          title="<:3_:1544740764309786694> GENERAL & UTILITY COMMANDS",
+          title="<:1_:1544558017939243078> GENERAL & UTILITY COMMANDS",
           description=(
               "```yaml\n"
               "!commands      - Open panel\n"
@@ -386,7 +386,7 @@ class CommandDropdown(discord.ui.Select):
 
     elif self.values[0] == "security":
       embed = discord.Embed(
-          title="<:3_:1544740764309786694> MODERATION & SECURITY COMMANDS",
+          title="<:2_:1544557232518332489> MODERATION & SECURITY COMMANDS",
           description=(
               "```yaml\n"
               "!ban           - Ban user with GIF\n"
@@ -448,7 +448,7 @@ async def custom_commands(ctx):
 @bot.command(name="anti-on")
 async def anti_on_status(ctx):
   embed = discord.Embed(
-      title="<:3_:1544740764309786694> SECURITY SYSTEMS STATUS (V7)",
+      title="<:1_:1544558017939243078> SECURITY SYSTEMS STATUS (V7)",
       description=(
           "Here is the current operational status of the server defense"
           " shields:"
@@ -457,53 +457,53 @@ async def anti_on_status(ctx):
   )
   embed.add_field(
       name="🤖 Anti-Bot Shield",
-      value="<:4_:1544743320742531092> **ACTIVE**\n> Blocks unauthorized bots.",
+      value="<:2_:1544557232518332489> **ACTIVE**\n> Blocks unauthorized bots.",
       inline=False,
   )
   embed.add_field(
       name="🔗 Anti-Webhook Shield",
-      value="<:4_:1544743320742531092> **ACTIVE**\n> Deletes rogue webhooks.",
+      value="<:2_:1544557232518332489> **ACTIVE**\n> Deletes rogue webhooks.",
       inline=False,
   )
   embed.add_field(
       name="⚡ Anti-Spam Shield",
       value=(
-          "<:4_:1544743320742531092> **ACTIVE**\n> Bans rapid message"
+          "<:2_:1544557232518332489> **ACTIVE**\n> Bans rapid message"
           " spammers."
       ),
       inline=False,
   )
   embed.add_field(
       name="🚫 Anti-Link & Invite",
-      value="<:4_:1544743320742531092> **ACTIVE**\n> Deletes external links.",
+      value="<:2_:1544557232518332489> **ACTIVE**\n> Deletes external links.",
       inline=False,
   )
   embed.add_field(
       name="👥 Anti-Mass Mention",
-      value="<:4_:1544743320742531092> **ACTIVE**\n> Blocks mass tagging.",
+      value="<:2_:1544557232518332489> **ACTIVE**\n> Blocks mass tagging.",
       inline=False,
   )
   embed.add_field(
-      name="<:3_:1544740764309786694> Anti-Role Assign",
-      value="<:4_:1544743320742531092> **ACTIVE**\n> Blocks rogue admin roles.",
+      name="<:1_:1544558017939243078> Anti-Role Assign",
+      value="<:2_:1544557232518332489> **ACTIVE**\n> Blocks rogue admin roles.",
       inline=False,
   )
   embed.add_field(
       name="📢 Anti-Everyone Shield",
       value=(
-          "<:4_:1544743320742531092> **ACTIVE**\n> Blocks @everyone / @here."
+          "<:2_:1544557232518332489> **ACTIVE**\n> Blocks @everyone / @here."
       ),
       inline=False,
   )
   embed.add_field(
       name="🔨 Anti-Mass Ban Shield",
-      value="<:4_:1544743320742531092> **ACTIVE**\n> Stops mass banning raids.",
+      value="<:2_:1544557232518332489> **ACTIVE**\n> Stops mass banning raids.",
       inline=False,
   )
   embed.add_field(
       name="📂 Anti-Nuke Channel Shield",
       value=(
-          "<:4_:1544743320742531092> **ACTIVE**\n> Instantly bans anyone"
+          "<:2_:1544557232518332489> **ACTIVE**\n> Instantly bans anyone"
           " deleting channels."
       ),
       inline=False,
@@ -511,7 +511,7 @@ async def anti_on_status(ctx):
   embed.add_field(
       name="🔒 Anti-Tamper & Bot Shield",
       value=(
-          "<:4_:1544743320742531092> **ACTIVE**\n> Protects bot roles &"
+          "<:2_:1544557232518332489> **ACTIVE**\n> Protects bot roles &"
           " instantly bans tamperers."
       ),
       inline=False,
@@ -621,7 +621,7 @@ async def server_info(ctx):
   categories = len(guild.categories)
 
   embed = discord.Embed(
-      title="<:4_:1544743320742531092> Server Overview", color=discord.Color.from_rgb(200, 20, 20)
+      title="<:2_:1544557232518332489> Server Overview", color=discord.Color.from_rgb(200, 20, 20)
   )
 
   if guild.icon:
@@ -638,7 +638,7 @@ async def server_info(ctx):
   )
 
   embed.add_field(
-      name="<:4_:1544743320742531092> Members",
+      name="<:2_:1544557232518332489> Members",
       value=(
           f"Total Members: **{guild.member_count}**\nOnline Members:"
           f" **{online_count}**\nHuman Members: **{humans_count}**\nBots:"
