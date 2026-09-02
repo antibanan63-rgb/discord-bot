@@ -720,7 +720,7 @@ async def user_info(ctx, member: discord.Member = None):
 
   embed.set_footer(
       text="© ROOT ACCESS — SHIELD",
-      icon_url=ctx.author.avatar.url if ctx.author.avatar me else None,
+      icon_url=ctx.author.avatar.url if ctx.author.avatar else None,
   )
 
   await ctx.send(embed=embed)
