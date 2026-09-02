@@ -338,7 +338,7 @@ class CommandDropdown(discord.ui.Select):
         discord.SelectOption(
             label="General & Utility",
             description="View general commands and utility tools",
-            emoji=discord.PartialEmoji(name="1_", id=1544558017939243078),
+            emoji=discord.PartialEmoji(name="3_", id=1544740764309786694),
             value="general",
         ),
         discord.SelectOption(
@@ -358,7 +358,7 @@ class CommandDropdown(discord.ui.Select):
   async def callback(self, interaction: discord.Interaction):
     if self.values[0] == "general":
       embed = discord.Embed(
-          title="<:1_:1544558017939243078> GENERAL & UTILITY COMMANDS",
+          title="<:3_:1544740764309786694> GENERAL & UTILITY COMMANDS",
           description=(
               "```yaml\n"
               "!commands      - Open panel\n"
@@ -457,53 +457,62 @@ async def anti_on_status(ctx):
   )
   embed.add_field(
       name="🤖 Anti-Bot Shield",
-      value="🟢 **ACTIVE**\n> Blocks unauthorized bots.",
+      value="<:4_:1544743320742531092> **ACTIVE**\n> Blocks unauthorized bots.",
       inline=False,
   )
   embed.add_field(
       name="🔗 Anti-Webhook Shield",
-      value="🟢 **ACTIVE**\n> Deletes rogue webhooks.",
+      value="<:4_:1544743320742531092> **ACTIVE**\n> Deletes rogue webhooks.",
       inline=False,
   )
   embed.add_field(
       name="⚡ Anti-Spam Shield",
-      value="🟢 **ACTIVE**\n> Bans rapid message spammers.",
+      value=(
+          "<:4_:1544743320742531092> **ACTIVE**\n> Bans rapid message"
+          " spammers."
+      ),
       inline=False,
   )
   embed.add_field(
       name="🚫 Anti-Link & Invite",
-      value="🟢 **ACTIVE**\n> Deletes external links.",
+      value="<:4_:1544743320742531092> **ACTIVE**\n> Deletes external links.",
       inline=False,
   )
   embed.add_field(
       name="👥 Anti-Mass Mention",
-      value="🟢 **ACTIVE**\n> Blocks mass tagging.",
+      value="<:4_:1544743320742531092> **ACTIVE**\n> Blocks mass tagging.",
       inline=False,
   )
   embed.add_field(
       name="<:3_:1544740764309786694> Anti-Role Assign",
-      value="🟢 **ACTIVE**\n> Blocks rogue admin roles.",
+      value="<:4_:1544743320742531092> **ACTIVE**\n> Blocks rogue admin roles.",
       inline=False,
   )
   embed.add_field(
       name="📢 Anti-Everyone Shield",
-      value="🟢 **ACTIVE**\n> Blocks @everyone / @here.",
+      value=(
+          "<:4_:1544743320742531092> **ACTIVE**\n> Blocks @everyone / @here."
+      ),
       inline=False,
   )
   embed.add_field(
       name="🔨 Anti-Mass Ban Shield",
-      value="🟢 **ACTIVE**\n> Stops mass banning raids.",
+      value="<:4_:1544743320742531092> **ACTIVE**\n> Stops mass banning raids.",
       inline=False,
   )
   embed.add_field(
       name="📂 Anti-Nuke Channel Shield",
-      value="🟢 **ACTIVE**\n> Instantly bans anyone deleting channels.",
+      value=(
+          "<:4_:1544743320742531092> **ACTIVE**\n> Instantly bans anyone"
+          " deleting channels."
+      ),
       inline=False,
   )
   embed.add_field(
       name="🔒 Anti-Tamper & Bot Shield",
       value=(
-          "🟢 **ACTIVE**\n> Protects bot roles & instantly bans tamperers."
+          "<:4_:1544743320742531092> **ACTIVE**\n> Protects bot roles &"
+          " instantly bans tamperers."
       ),
       inline=False,
   )
