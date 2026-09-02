@@ -401,4 +401,485 @@ class CommandDropdown(discord.ui.Select):
               "!ka            - Voice kick with GIF\n"
               "!anti-on       - Check security status\n"
               "!deleteall     - Owner protocol\n"
-              "
+              "```"
+          ),
+          color=discord.Color.from_rgb(138, 43, 226),
+      )
+      embed.set_image(url=MENU_GIF_URL)
+      embed.set_footer(
+          text=f"© ROOT ACCESS — SHIELD | Requested by {interaction.user.name}",
+          icon_url=(
+              interaction.user.avatar.url if interaction.user.avatar else None
+          ),
+      )
+      await interaction.response.edit_message(embed=embed)
+
+
+class CommandView(discord.ui.View):
+
+  def __init__(self):
+    super().__init__(timeout=180)
+    self.add_item(CommandDropdown())
+
+
+@bot.command(name="commands")
+async def custom_commands(ctx):
+  embed = discord.Embed(
+      title="⚡ ROOT CONTROL // SYSTEM V7",
+      description=(
+          "> **Welcome to the ultimate system panel.** Total server security"
+          " & dominance activated.\n\n👇 **Select a category from the dropdown"
+          " menu below to view its commands:**"
+      ),
+      color=discord.Color.from_rgb(138, 43, 226),
+  )
+
+  embed.set_image(url=MENU_GIF_URL)
+
+  embed.set_footer(
+      text=f"© ROOT ACCESS — SHIELD | Requested by {ctx.author.name}",
+      icon_url=ctx.author.avatar.url if ctx.author.avatar else None,
+  )
+
+  await ctx.send(embed=embed, view=CommandView())
+
+
+# ==================== SECURITY CHECK COMMAND (Anti-On) ====================
+@bot.command(name="anti-on")
+async def anti_on_status(ctx):
+  embed = discord.Embed(
+      title="🛡️ SECURITY SYSTEMS STATUS (V7)",
+      description=(
+          "Here is the current operational status of the server defense"
+          " shields:"
+      ),
+      color=discord.Color.green(),
+  )
+  embed.add_field(
+      name="🤖 Anti-Bot Shield",
+      value="🟢 **ACTIVE**\n> Blocks unauthorized bots.",
+      inline=False,
+  )
+  embed.add_field(
+      name="🔗 Anti-Webhook Shield",
+      value="🟢 **ACTIVE**\n> Deletes rogue webhooks.",
+      inline=False,
+  )
+  embed.add_field(
+      name="⚡ Anti-Spam Shield",
+      value="🟢 **ACTIVE**\n> Bans rapid message spammers.",
+      inline=False,
+  )
+  embed.add_field(
+      name="🚫 Anti-Link & Invite",
+      value="🟢 **ACTIVE**\n> Deletes external links.",
+      inline=False,
+  )
+  embed.add_field(
+      name="👥 Anti-Mass Mention",
+      value="🟢 **ACTIVE**\n> Blocks mass tagging.",
+      inline=False,
+  )
+  embed.add_field(
+      name="🛡️ Anti-Role Assign",
+      value="🟢 **ACTIVE**\n> Blocks rogue admin roles.",
+      inline=False,
+  )
+  embed.add_field(
+      name="📢 Anti-Everyone Shield",
+      value="🟢 **ACTIVE**\n> Blocks @everyone / @here.",
+      inline=False,
+  )
+  embed.add_field(
+      name="🔨 Anti-Mass Ban Shield",
+      value="🟢 **ACTIVE**\n> Stops mass banning raids.",
+      inline=False,
+  )
+  embed.add_field(
+      name="📂 Anti-Nuke Channel Shield",
+      value="🟢 **ACTIVE**\n> Instantly bans anyone deleting channels.",
+      inline=False,
+  )
+  embed.add_field(
+      name="🔒 Anti-Tamper & Bot Shield",
+      value=(
+          "🟢 **ACTIVE**\n> Protects bot roles & instantly bans tamperers."
+      ),
+      inline=False,
+  )
+
+  embed.set_footer(
+      text=f"© ROOT ACCESS — SHIELD | Checked by {ctx.author.name}",
+      icon_url=ctx.author.avatar.url if ctx.author.avatar else None,
+  )
+  await ctx.send(embed=embed)
+
+
+# ==================== GENERAL & UTILITY COMMANDS ====================
+@bot.command(name="ping")
+async def ping_system(ctx):
+  latency = round(bot.latency * 1000)
+  await ctx.send(f"🏓 Pong! Latency: **{latency}ms**")
+
+
+@bot.command(name="avatar")
+async def user_avatar(ctx, member: discord.Member = None):
+  target = member or ctx.author
+  embed = discord.Embed(
+      title=f"🖼️ {target.name}'s Avatar", color=discord.Color.purple()
+  )
+  if target.avatar:
+    embed.set_image(url=target.avatar.url)
+  embed.set_footer(
+      text="© ROOT ACCESS — SHIELD",
+      icon_url=ctx.author.avatar.url if ctx.author.avatar else None,
+  )
+  await ctx.send(embed=embed)
+
+
+@bot.command(name="serveravatar")
+async def server_avatar(ctx):
+  if not ctx.guild.icon:
+    await ctx.send("❌ No server icon!")
+    return
+  embed = discord.Embed(
+      title=f"🖼️ {ctx.guild.name} Icon", color=discord.Color.blurple()
+  )
+  embed.set_image(url=ctx.guild.icon.url)
+  embed.set_footer(
+      text="© ROOT ACCESS — SHIELD",
+      icon_url=ctx.author.avatar.url if ctx.author.avatar else None,
+  )
+  await ctx.send(embed=embed)
+
+
+@bot.command(name="roleinfo")
+async def role_info(ctx, role: discord.Role):
+  embed = discord.Embed(title=f"📌 Role: {role.name}", color=role.color)
+  embed.add_field(name="ID", value=role.id, inline=True)
+  embed.add_field(name="Members", value=len(role.members), inline=True)
+  embed.add_field(name="Color", value=str(role.color), inline=True)
+  embed.set_footer(
+      text="© ROOT ACCESS — SHIELD",
+      icon_url=ctx.author.avatar.url if ctx.author.avatar else None,
+  )
+  await ctx.send(embed=embed)
+
+
+@bot.command(name="membercount")
+async def member_count(ctx):
+  await ctx.send(
+      f"👥 Total Members in **{ctx.guild.name}**: `{ctx.guild.member_count}`"
+  )
+
+
+@bot.command(name="clear")
+@commands.has_permissions(manage_messages=True)
+async def clear_messages(ctx, amount: int = 5):
+  await ctx.channel.purge(limit=amount + 1)
+  msg = await ctx.send(f"🧹 Successfully cleared `{amount}` messages!")
+  await asyncio.sleep(3)
+  await msg.delete()
+
+
+@bot.command(name="removerole")
+@commands.has_permissions(administrator=True)
+async def remove_role_all(ctx, role: discord.Role):
+  count = 0
+  await ctx.send(f"⏳ Removing role **{role.name}** from all members...")
+  for member in ctx.guild.members:
+    if role in member.roles:
+      try:
+        await member.remove_roles(role)
+        count += 1
+      except:
+        pass
+  await ctx.send(
+      f"✅ Successfully removed role **{role.name}** from `{count}` members!"
+  )
+
+
+@bot.command(name="serverinfo")
+async def server_info(ctx):
+  guild = ctx.guild
+
+  bots_count = sum(1 for m in guild.members if m.bot)
+  humans_count = guild.member_count - bots_count
+  online_count = sum(1 for m in guild.members if m.status != discord.Status.offline)
+
+  text_channels = len(guild.text_channels)
+  voice_channels = len(guild.voice_channels)
+  categories = len(guild.categories)
+
+  embed = discord.Embed(
+      title="🟢 Server Info", color=discord.Color.from_rgb(200, 20, 20)
+  )
+
+  if guild.icon:
+    embed.set_thumbnail(url=guild.icon.url)
+
+  embed.add_field(
+      name="🛑 Server Overview",
+      value=(
+          f"Name: **{guild.name}**\nServer ID: `{guild.id}`\nOwner: 👑"
+          f" {guild.owner.mention if guild.owner else 'Unknown'}\nCreated:"
+          f" `{guild.created_at.strftime('%A %d %B %Y %H:%M')}`"
+      ),
+      inline=False,
+  )
+
+  embed.add_field(
+      name="🟢 Members",
+      value=(
+          f"Total Members: **{guild.member_count}**\nOnline Members:"
+          f" **{online_count}**\nHuman Members: **{humans_count}**\nBots:"
+          f" **{bots_count}**"
+      ),
+      inline=False,
+  )
+
+  embed.add_field(
+      name="📁 Channels",
+      value=(
+          f"Total Channels: **{text_channels + voice_channels}**\nText"
+          f" Channels: **{text_channels}**\nVoice Channels:"
+          f" **{voice_channels}**\nCategories: **{categories}**"
+      ),
+      inline=False,
+  )
+
+  embed.set_image(
+      url=(
+          "https://cdn.discordapp.com/attachments/1388292357853544541/1544285567703851088/2924641988d24cbb3cdf45171bceefdc.gif?ex=6a97f382&is=6a96a202&hm=e9f0696b2da02e404c7d322f197d49da6f88ef419a9183dd8e589091ccbf8b39&"
+      )
+  )
+  embed.set_footer(
+      text=f"© ROOT ACCESS — SHIELD | Requested by {ctx.author.name}",
+      icon_url=ctx.author.avatar.url if ctx.author.avatar else None,
+  )
+
+  await ctx.send(embed=embed)
+
+
+@bot.command(name="userinfo")
+async def user_info(ctx, member: discord.Member = None):
+  target = member or ctx.author
+
+  created_at = target.created_at.strftime("%A %d %B %Y %H:%M")
+  joined_at = (
+      target.joined_at.strftime("%A %d %B %Y %H:%M")
+      if target.joined_at
+      else "Unknown"
+  )
+
+  roles = [
+      role.mention for role in target.roles if role != ctx.guild.default_role
+  ]
+  roles_display = ", ".join(roles) if roles else "None"
+  highest_role = (
+      target.top_role.mention
+      if target.top_role != ctx.guild.default_role
+      else "None"
+  )
+
+  embed = discord.Embed(color=discord.Color.from_rgb(45, 45, 45))
+
+  if target.avatar:
+    embed.set_thumbnail(url=target.avatar.url)
+
+  embed.add_field(
+      name="🪪 USER INFO", value="-----------------------------------------", inline=False
+  )
+
+  embed.add_field(
+      name="📋 ACCOUNT OVERVIEW",
+      value=(
+          f"> **User:** {target.mention}\n> **Username:** `{target.name}`\n>"
+          f" **Display Name:** `{target.display_name}`\n> **User ID:**"
+          f" `{target.id}`\n> **Account Type:** `Human`\n> **Badges:** `None`"
+      ),
+      inline=False,
+  )
+
+  embed.add_field(
+      name="⏳ ACCOUNT TIMELINE",
+      value=f"> **Created:** `{created_at}`\n> **Account Age:** `Active`",
+      inline=False,
+  )
+
+  embed.add_field(
+      name="🛡️ SERVER PROFILE",
+      value=(
+          f"> **Nickname:** `None`\n> **Joined Server:** `{joined_at}`\n>"
+          f" **Status:** `{str(target.status).capitalize()}`\n> **Roles"
+          f" ({len(roles)}):** {roles_display}\n> **Highest Role:**"
+          f" {highest_role}\n> **Boosting:** `No`\n> **Timeout:** `None`"
+      ),
+      inline=False,
+  )
+
+  embed.set_footer(
+      text="© ROOT ACCESS — SHIELD",
+      icon_url=ctx.author.avatar.url if ctx.author.avatar me else None,
+  )
+
+  await ctx.send(embed=embed)
+
+
+# ==================== MODERATION & SECURITY COMMANDS ====================
+@bot.command(name="ban")
+@commands.has_permissions(ban_members=True)
+async def ban_member(ctx, member: discord.Member, *, reason="No reason provided"):
+  await member.ban(reason=reason)
+  ban_gif = "https://cdn.discordapp.com/attachments/1543270990962753576/1544243621107212308/8a36885c2659fed6316e5645c7b4afae.gif?ex=6a97cc71&is=6a967af1&hm=9761a8180d9fdb5df3247d6d35b12207e04c80766e360d846fe800ca66fdfb3c&"
+  embed = discord.Embed(
+      title="🔨 USER TERMINATED (BANNED)",
+      description=(
+          f"**User:** {member.mention}\n**Reason:** `{reason}`\n**Moderator:**"
+          f" {ctx.author.mention}"
+      ),
+      color=discord.Color.red(),
+  )
+  embed.set_image(url=ban_gif)
+  embed.set_footer(
+      text="© ROOT ACCESS — SHIELD",
+      icon_url=ctx.author.avatar.url if ctx.author.avatar else None,
+  )
+  await ctx.send(embed=embed)
+
+
+@bot.command(name="unban")
+@commands.has_permissions(ban_members=True)
+async def unban_member(ctx, user_id: int):
+  try:
+    user = discord.Object(id=user_id)
+    await ctx.guild.unban(user)
+    await ctx.send(f"🔓 Unbanned user ID **{user_id}** successfully.")
+  except discord.NotFound:
+    await ctx.send("❌ User not found in ban list or invalid ID.")
+  except Exception as e:
+    await ctx.send(f"❌ An error occurred: `{e}`")
+
+
+@bot.command(name="kick")
+@commands.has_permissions(kick_members=True)
+async def kick_member(ctx, member: discord.Member, *, reason="No reason provided"):
+  await member.kick(reason=reason)
+  await ctx.send(f"👢 Kicked **{member.name}** | Reason: `{reason}`")
+
+
+@bot.command(name="warn")
+@commands.has_permissions(kick_members=True)
+async def warn_member(ctx, member: discord.Member, *, reason="No reason provided"):
+  embed = discord.Embed(
+      title="⚠️ SYSTEM WARNING",
+      description=(
+          f"**Member:** {member.mention}\n**Moderator:**"
+          f" {ctx.author.mention}\n**Reason:** `{reason}`"
+      ),
+      color=discord.Color.orange(),
+  )
+  embed.set_footer(
+      text="© ROOT ACCESS — SHIELD",
+      icon_url=ctx.author.avatar.url if ctx.author.avatar else None,
+  )
+  await ctx.send(embed=embed)
+  try:
+    await member.send(
+        f"⚠️ You have been warned in **{ctx.guild.name}** for: `{reason}`"
+    )
+  except discord.Forbidden:
+    pass
+
+
+@bot.command(name="giverole")
+@commands.has_permissions(manage_roles=True)
+async def give_role(ctx, member: discord.Member, role: discord.Role):
+  await member.add_roles(role)
+  await ctx.send(f"✅ Added role **{role.name}** to **{member.name}**.")
+
+
+@bot.command(name="lock")
+@commands.has_permissions(manage_channels=True)
+async def lock_channel(ctx):
+  await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=False)
+  await ctx.send("🔒 Channel has been locked successfully.")
+
+
+@bot.command(name="unlock")
+@commands.has_permissions(manage_channels=True)
+async def unlock_channel(ctx):
+  await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)
+  await ctx.send("🔓 Channel has been unlocked.")
+
+
+@bot.command(name="lockdown")
+@commands.has_permissions(administrator=True)
+async def lockdown_server(ctx):
+  for channel in ctx.guild.text_channels:
+    await channel.set_permissions(ctx.guild.default_role, send_messages=False)
+  await ctx.send(
+      "🚨 **EMERGENCY LOCKDOWN ACTIVATED:** All text channels have been"
+      " locked!"
+  )
+
+
+@bot.command(name="slowmode")
+@commands.has_permissions(manage_channels=True)
+async def slowmode(ctx, seconds: int = 0):
+  await ctx.channel.edit(slowmode_delay=seconds)
+  if seconds == 0:
+    await ctx.send("⚡ Slowmode has been **disabled**.")
+  else:
+    await ctx.send(f"⏳ Slowmode set to **{seconds}** seconds.")
+
+
+@bot.command(name="ka")
+async def kick_all_voice(ctx):
+  if not ctx.author.voice or not ctx.author.voice.channel:
+    embed_err = discord.Embed(
+        title="❌ ERROR",
+        description="You must be in a voice channel to use this command!",
+        color=discord.Color.red(),
+    )
+    await ctx.send(embed=embed_err)
+    return
+
+  channel = ctx.author.voice.channel
+  member_count = len(channel.members)
+
+  ka_gif = "https://cdn.discordapp.com/attachments/1543270990962753576/1544253396675203102/1f825152819d7f3576c3dfbf1c810cbe.gif?ex=6a97d58c&is=6a96840c&hm=7d42ff83542aeb38a1ef030e6698301b9c0b88f7bfcd3f89e1577ec093fe5f7e&"
+
+  embed = discord.Embed(
+      title="👢 VOICE CHANNEL EVACUATED",
+      description=(
+          f"**Channel:** `{channel.name}`\n**Evacuated Members:**"
+          f" `{member_count}`\n**Executor:** {ctx.author.mention}"
+      ),
+      color=discord.Color.from_rgb(138, 43, 226),
+  )
+  embed.set_image(url=ka_gif)
+  embed.set_footer(
+      text="© ROOT ACCESS — SHIELD",
+      icon_url=ctx.author.avatar.url if ctx.author.avatar else None,
+  )
+  await ctx.send(embed=embed)
+
+  for member in channel.members:
+    await member.move_to(None)
+
+
+@bot.command(name="deleteall")
+async def delete_all_protocol(ctx):
+  if ctx.author.id not in ALLOWED_USER_IDS:
+    await ctx.send(
+        "❌ **Access Denied:** Owner permission required for this protocol."
+    )
+    return
+  await ctx.send(
+      "⚠️ **Absolute Server Protocol Initiated...** (Safety safeguard:"
+      " channels protected)"
+  )
+
+
+bot.run(TOKEN)
