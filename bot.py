@@ -17,10 +17,10 @@ intents.guilds = True
 intents.bans = True
 intents.webhooks = True
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+bot = commands.Bot(command_prefix="!", intents.intents)
 bot.remove_command("help")
 
-# الآيدي ديالك بوحدك هو لي عنده الصلاحيات الكاملة
+# الآيدي ديالك (مستثنى من جميع الحمايات، ويقدر يستعمل أمر anti-on ويتحكم بحرية)
 ALLOWED_USER_IDS = [1461150056915796153]
 
 # قواميس لتتبع العمليات والرسائل
@@ -39,6 +39,16 @@ async def on_ready():
 @bot.event
 async def on_member_join(member):
   if member.bot:
+    async for entry in member.guild.audit_logs(
+        limit=1, action=discord.AuditLogAction.bot_add
+    ):
+      if entry.user and entry.user.id in ALLOWED_USER_IDS:
+        print(
+            f"✅ Allowed authorized bot entry by owner: {member.name}"
+            f" ({member.id})"
+        )
+        return
+
     if member.id not in ALLOWED_USER_IDS:
       try:
         await member.ban(
@@ -56,6 +66,12 @@ async def on_member_join(member):
 @bot.event
 async def on_webhooks_update(channel):
   try:
+    async for entry in channel.guild.audit_logs(
+        limit=1, action=discord.AuditLogAction.webhook_create
+    ):
+      if entry.user and entry.user.id in ALLOWED_USER_IDS:
+        return
+
     webhooks = await channel.webhooks()
     for webhook in webhooks:
       await webhook.delete(
@@ -220,7 +236,7 @@ async def on_member_ban(guild, user):
           print(f"❌ Failed to stop mass-banner: {e}")
 
 
-# ==================== ADVANCED MESSAGE SECURITY (SPAM, LINKS, MENTIONS, EVERYONE) ====================
+# ==================== ADVANCED MESSAGE SECURITY ====================
 @bot.event
 async def on_message(message):
   if message.author.bot or not message.guild:
@@ -234,7 +250,6 @@ async def on_message(message):
   author_id = message.author.id
   current_time = asyncio.get_event_loop().time()
 
-  # 1. منع منشن الجميع @everyone / @here
   if message.mention_everyone:
     try:
       await message.delete()
@@ -248,7 +263,6 @@ async def on_message(message):
     except Exception as e:
       print(f"❌ Failed to delete everyone mention: {e}")
 
-  # 2. نظام منع الروابط ودعوات ديسكورد (Anti-Link / Anti-Invite)
   content_lower = message.content.lower()
   if (
       "discord.gg/" in content_lower
@@ -267,7 +281,6 @@ async def on_message(message):
     except Exception as e:
       print(f"❌ Failed to delete link: {e}")
 
-  # 3. نظام منع المينشن العشوائي المفرط (Anti-Mass Mention)
   if len(message.mentions) >= 4:
     try:
       await message.delete()
@@ -285,7 +298,6 @@ async def on_message(message):
     except Exception as e:
       print(f"❌ Failed to ban mass mentioner: {e}")
 
-  # 4. نظام Anti-Spam الكلاسيكي
   message_history[author_id] = [
       t for t in message_history[author_id] if current_time - t < 3.0
   ]
@@ -315,7 +327,7 @@ async def on_message(message):
   await bot.process_commands(message)
 
 
-# ==================== COMMAND CENTER PANEL (SELECT MENU - ENGLISH) ====================
+# ==================== COMMAND CENTER PANEL (SELECT MENU) ====================
 
 
 class CommandDropdown(discord.ui.Select):
@@ -407,7 +419,6 @@ async def custom_commands(ctx):
       color=discord.Color.from_rgb(138, 43, 226),
   )
 
-  # الـ GIF الجديد اللي عطيتيني
   embed.set_thumbnail(
       url="https://cdn.discordapp.com/attachments/1544326452638388265/1544545442304626829/e0f0a0c3b6bdc0ca18b96ff3738ca347.gif?ex=6a98e589&is=6a979409&hm=985c5373cd73d64f04c711e4291cf63040062efb798ae3d0d008ffa52cb416d0&"
   )
@@ -420,15 +431,10 @@ async def custom_commands(ctx):
   await ctx.send(embed=embed, view=CommandView())
 
 
-# ==================== OWNER-LOCKED SECURITY CHECK COMMAND ====================
+# ==================== SECURITY CHECK COMMAND (Anti-On) ====================
 @bot.command(name="anti-on")
 async def anti_on_status(ctx):
-  if ctx.author.id not in ALLOWED_USER_IDS:
-    await ctx.send(
-        "❌ **Access Denied:** Owner permission required for this command."
-    )
-    return
-
+  # هاد الأمر كايخدم عادي ويطلع لجميع الأعضاء، ولكن الحمايات بوحدها لي مفوكتين ليك أنت
   embed = discord.Embed(
       title="🛡️ SECURITY SYSTEMS STATUS (V7)",
       description=(
