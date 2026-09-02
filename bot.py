@@ -407,8 +407,10 @@ async def custom_commands(ctx):
       color=discord.Color.from_rgb(138, 43, 226),
   )
 
-  if bot.user.avatar:
-    embed.set_thumbnail(url=bot.user.avatar.url)
+  # الـ GIF الجديد اللي عطيتيني
+  embed.set_thumbnail(
+      url="https://cdn.discordapp.com/attachments/1544326452638388265/1544545442304626829/e0f0a0c3b6bdc0ca18b96ff3738ca347.gif?ex=6a98e589&is=6a979409&hm=985c5373cd73d64f04c711e4291cf63040062efb798ae3d0d008ffa52cb416d0&"
+  )
 
   embed.set_footer(
       text=f"© ROOT ACCESS — SHIELD | Requested by {ctx.author.name}",
