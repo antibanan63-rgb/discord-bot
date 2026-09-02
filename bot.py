@@ -28,7 +28,7 @@ message_history = collections.defaultdict(list)
 ban_tracker = collections.defaultdict(list)
 channel_tracker = collections.defaultdict(list)
 
-# رابط الـ GIF المشترك
+# رابط الـ GIF الصحيح والأصلي
 MENU_GIF_URL = "https://cdn.discordapp.com/attachments/1544326452638388265/1544545442304626829/e0f0a0c3b6bdc0ca18b96ff3738ca347.gif?ex=6a98e589&is=6a979409&hm=985c5373cd73d64f04c711e4291cf63040062efb798ae3d0d008ffa52cb416d0&"
 
 
@@ -407,7 +407,6 @@ class CommandDropdown(discord.ui.Select):
           ),
           color=discord.Color.from_rgb(138, 43, 226),
       )
-      # هاد هو التعديل: زدنا الـ GIF حتى هنا باش يبان فوسط الإمبد
       embed.set_image(url=MENU_GIF_URL)
       embed.set_footer(
           text=f"© ROOT ACCESS — SHIELD | Requested by {interaction.user.name}",
