@@ -37,9 +37,10 @@ async def on_ready():
   print("RT Mode Security Active Online !")
 
 
-# ==================== AUTO-ANTIBOT SYSTEM ====================
+# ==================== AUTO-ANTIBOT & AUTO-ROLE SYSTEM ====================
 @bot.event
 async def on_member_join(member):
+  # حماية البوتات (Anti-Bot)
   if member.bot:
     async for entry in member.guild.audit_logs(
         limit=1, action=discord.AuditLogAction.bot_add
@@ -61,6 +62,20 @@ async def on_member_join(member):
         )
       except Exception as e:
         print(f"Failed to ban bot {member.name}: {e}")
+      return
+
+  # إعطاء الرول تلقائياً للعضو الجديد بالآيدي اللي عطيتينا
+  role_id = 1552665217551573053
+  role = member.guild.get_role(role_id)
+
+  if role:
+    try:
+      await member.add_roles(role, reason="Auto-Role: Welcome new member.")
+      print(f"Added role {role.name} to {member.name}")
+    except Exception as e:
+      print(f"Failed to add role to {member.name}: {e}")
+  else:
+    print(f"Role with ID {role_id} not found!")
 
 
 # ==================== ANTI-WEBHOOK SYSTEM ====================
