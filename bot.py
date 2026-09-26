@@ -66,8 +66,8 @@ async def on_member_join(member):
                 print(f"Failed to ban bot {member.name}: {e}")
             return
 
-    # إعطاء الرول تلقائياً للعضو الجديد بالآيدي المخصص
-    role_id = 1552665217551573053
+    # إعطاء الرول تلقائياً للعضو الجديد بالآيدي الجديد
+    role_id = 1553484572174589972
     role = member.guild.get_role(role_id)
 
     if role:
@@ -130,7 +130,6 @@ async def on_member_update(before, after):
 # ==================== SECURITY CHECK COMMAND (Anti-On) ====================
 @bot.command(name="anti-on")
 async def anti_on_status(ctx):
-    # البحث عن الإيموجي تلقائياً بالاسم داخل السيرفر
     emoji = discord.utils.get(ctx.guild.emojis, name="1_")
     emoji_str = str(emoji) if emoji else ""
 
