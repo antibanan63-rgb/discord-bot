@@ -64,7 +64,7 @@ async def on_member_join(member):
         print(f"Failed to ban bot {member.name}: {e}")
       return
 
-  # إعطاء الرول تلقائياً للعضو الجديد بالآيدي اللي عطيتينا
+  # إعطاء الرول تلقائياً للعضو الجديد بالآيدي المخصص
   role_id = 1552665217551573053
   role = member.guild.get_role(role_id)
 
