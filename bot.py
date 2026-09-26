@@ -74,6 +74,8 @@ async def on_member_join(member):
         try:
             await member.add_roles(role, reason="Auto-Role: Welcome new member.")
             print(f"[SUCCESS] Added role {role.name} to {member.name}")
+        except discord.Forbidden:
+            print(f"[ERROR] Forbidden! Bot cannot add role to {member.name}. Check role hierarchy and permissions (Manage Roles).")
         except Exception as e:
             print(f"[ERROR] Failed to add role to {member.name}: {e}")
     else:
