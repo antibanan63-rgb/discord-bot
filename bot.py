@@ -243,20 +243,20 @@ async def kick_member(ctx, member: discord.Member, *, reason="No reason provided
 
 @bot.command(name="lock")
 @commands.has_permissions(manage_channels=True)
-async def lock_channel(ctx):
+async def lock_channel(ctx: commands.Context):
     await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=False)
     await ctx.send("Channel has been locked successfully.")
 
 
 @bot.command(name="unlock")
 @commands.has_permissions(manage_channels=True)
-async def unlock_channel(ctx):
+async def unlock_channel(ctx: commands.Context):
     await ctx.channel.set_permissions(ctx.guild.default_role, send_messages=True)
     await ctx.send("Channel has been unlocked.")
 
 
 @bot.command(name="ka")
-async def kick_all_voice(ctx):
+async def kick_all_voice(ctx: commands.Context):
     if not ctx.author.voice or not ctx.author.voice.channel:
         embed_err = discord.Embed(
             title="ERROR",
