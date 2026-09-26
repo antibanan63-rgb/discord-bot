@@ -67,7 +67,7 @@ async def on_member_join(member):
             return
 
     # إعطاء الرول تلقائياً للعضو الجديد بالآيدي الصحيح
-    role_id = 1553484572174589972
+    role_id = 1552665217551573053
     role = member.guild.get_role(role_id)
 
     if role:
